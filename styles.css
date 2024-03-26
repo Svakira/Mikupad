@@ -1,0 +1,882 @@
+
+html {
+	--color-miku: #009bb3;
+	--color-base-0: oklch(0.20 0.02 60);
+	--color-base-10: color-mix(in oklch, var(--color-base-100) 10%, var(--color-base-0));
+	--color-base-20: color-mix(in oklch, var(--color-base-100) 20%, var(--color-base-0));
+	--color-base-30: color-mix(in oklch, var(--color-base-100) 30%, var(--color-base-0));
+	--color-base-40: color-mix(in oklch, var(--color-base-100) 40%, var(--color-base-0));
+	--color-base-50: color-mix(in oklch, var(--color-base-100) 50%, var(--color-base-0));
+	--color-base-60: color-mix(in oklch, var(--color-base-100) 60%, var(--color-base-0));
+	--color-base-70: color-mix(in oklch, var(--color-base-100) 70%, var(--color-base-0));
+	--color-base-80: color-mix(in oklch, var(--color-base-100) 80%, var(--color-base-0));
+	--color-base-90: color-mix(in oklch, var(--color-base-100) 90%, var(--color-base-0));
+	--color-base-100: oklch(0.95 0.04 70);
+	--color-dark: var(--color-base-0);
+	--color-light: var(--color-base-100);
+
+	font-family: serif;
+	font-size: 16px;
+	min-height: 100%;
+	display: flex;
+	flex-direction: column;
+
+	accent-color: var(--color-base-30);
+	background: var(--color-base-20);
+	color: var(--color-base-0);
+}
+
+html.serif-dark {
+	--color-base-0: oklch(0.95 0.04 30);
+	--color-base-10: color-mix(in oklch, var(--color-base-100) 10%, var(--color-base-0));
+	--color-base-20: color-mix(in oklch, var(--color-base-100) 80%, var(--color-base-0));
+	--color-base-30: color-mix(in oklch, var(--color-base-100) 70%, var(--color-base-0));
+	--color-base-40: color-mix(in oklch, var(--color-base-100) 60%, var(--color-base-0));
+	--color-base-50: color-mix(in oklch, var(--color-base-100) 50%, var(--color-base-0));
+	--color-base-60: color-mix(in oklch, var(--color-base-100) 40%, var(--color-base-0));
+	--color-base-70: color-mix(in oklch, var(--color-base-100) 30%, var(--color-base-0));
+	--color-base-80: color-mix(in oklch, var(--color-base-100) 20%, var(--color-base-0));
+	--color-base-90: color-mix(in oklch, var(--color-base-100) 10%, var(--color-base-0));
+	--color-base-100: oklch(0.20 0.02 30);
+	--color-dark: var(--color-base-100);
+	--color-light: var(--color-base-0);
+
+	color-scheme: dark;
+}
+
+html.nockoffAI {
+	---color-bg-dark: #191b31;
+	--color-bg: #191b31;
+
+	--color-text: #fff;
+	--color-base-0: #fff;
+	--color-base-10: color-mix(in oklch, var(--color-base-100) 90%, var(--color-base-0));
+	--color-base-20: color-mix(in oklch, var(--color-base-100) 80%, var(--color-base-0));
+	--color-base-30: color-mix(in oklch, var(--color-base-100) 70%, var(--color-base-0));
+	--color-base-40: color-mix(in oklch, var(--color-base-100) 60%, var(--color-base-0));
+	--color-base-50: color-mix(in oklch, var(--color-base-100) 50%, var(--color-base-0));
+	--color-base-60: color-mix(in oklch, var(--color-base-100) 40%, var(--color-base-0));
+	--color-base-70: color-mix(in oklch, var(--color-base-100) 30%, var(--color-base-0));
+	--color-base-80: color-mix(in oklch, var(--color-base-100) 20%, var(--color-base-0));
+	--color-base-90: color-mix(in oklch, var(--color-base-100) 10%, var(--color-base-0));
+	--color-base-100: #13152c;
+	--color-dark: var(--color-base-100);
+	--color-light: #fff;
+	--color-input: #0e0f21;
+	--color-sidebar: var(--color-base-100);
+	--color-prompt-area: #191b31;
+	--color-hover: #13152c;
+	--color-button: #22253f;
+	--color-disabled: #161833;
+	--color-button-hover: #282b44;
+
+	--token-prob-box: #4a4a4a;
+
+	font-family: "Source Sans Pro", "Helvetica Neue", sans-serif;
+	font-size: 15.5px;
+
+	accent-color: var(--color-base-30);
+	background: var(--color-bg-dark);
+	color: var(--color-base-0);
+	color-scheme: dark;
+}
+html.nockoffAI body {
+	background: var(--color-prompt-area)
+}
+
+html.monospace-dark {
+	---color-bg-dark: #282833;
+	--color-bg: #202020;
+	--color-text: #bababa;
+	--color-base-0: oklch(77.65% 0.0752 285.22);
+	--color-base-10: color-mix(in oklch, var(--color-base-100) 90%, var(--color-base-0));
+	--color-base-20: color-mix(in oklch, var(--color-base-100) 80%, var(--color-base-0));
+	--color-base-30: color-mix(in oklch, var(--color-base-100) 70%, var(--color-base-0));
+	--color-base-40: color-mix(in oklch, var(--color-base-100) 60%, var(--color-base-0));
+	--color-base-50: color-mix(in oklch, var(--color-base-100) 50%, var(--color-base-0));
+	--color-base-60: color-mix(in oklch, var(--color-base-100) 40%, var(--color-base-0));
+	--color-base-70: color-mix(in oklch, var(--color-base-100) 30%, var(--color-base-0));
+	--color-base-80: color-mix(in oklch, var(--color-base-100) 20%, var(--color-base-0));
+	--color-base-90: color-mix(in oklch, var(--color-base-100) 10%, var(--color-base-0));
+	--color-base-100: oklch(24.28% 0.015 285.22);
+	--color-dark: var(--color-base-100);
+	--color-light: var(--color-base-0);
+	--token-prob-box: #4a4a4a;
+
+	font-family: monospace;
+	font-size: 15px;
+
+	accent-color: var(--color-base-30);
+	background: var(--color-bg-dark);
+	color: var(--color-base-0);
+	color-scheme: dark;
+}
+
+html.infermatic {
+	---color-bg-dark: #282833;
+	--color-bg: #202020;
+	--color-text: #bababa;
+	--color-base-0: oklch(77.65% 0.0752 285.22);
+	--color-base-10: color-mix(in oklch, var(--color-base-100) 90%, var(--color-base-0));
+	--color-base-20: color-mix(in oklch, var(--color-base-100) 80%, var(--color-base-0));
+	--color-base-30: color-mix(in oklch, var(--color-base-100) 70%, var(--color-base-0));
+	--color-base-40: color-mix(in oklch, var(--color-base-100) 60%, var(--color-base-0));
+	--color-base-50: color-mix(in oklch, var(--color-base-100) 50%, var(--color-base-0));
+	--color-base-60: color-mix(in oklch, var(--color-base-100) 40%, var(--color-base-0));
+	--color-base-70: color-mix(in oklch, var(--color-base-100) 30%, var(--color-base-0));
+	--color-base-80: color-mix(in oklch, var(--color-base-100) 20%, var(--color-base-0));
+	--color-base-90: color-mix(in oklch, var(--color-base-100) 10%, var(--color-base-0));
+	--color-base-100: oklch(24.28% 0.015 285.22);
+	--color-dark: var(--color-base-100);
+	--color-light: var(--color-base-0);
+	--token-prob-box: #4a4a4a;
+
+	font-family: monospace;
+	font-size: 15px;
+
+	accent-color: var(--color-base-30);
+	background: var(--color-bg-dark);
+	background-color: var(--color-bg-dark); /* Preserve the background color */
+    background-image: var(--custom-bg-image, url('path/to/default/background-image.jpg')); /* Use custom property */
+    background-size: cover; /* Cover the entire page */
+    background-position: center; /* Center the background image */
+    background-repeat: no-repeat;
+	color: var(--color-base-0);
+	color-scheme: dark;
+}
+
+body {
+	margin: 0;
+	display: flex;
+	flex: auto;
+	flex-direction: row;
+}
+@media (min-width: calc(40.5em + 250px)) {
+	body.attachSidebar {
+		margin-right: auto;
+		margin-left: auto;
+	}
+}
+
+#prompt-container {
+	position: relative;
+	font-size: 1.125rem;
+	max-width: 36em;
+	margin-right: auto;
+	margin-left: auto;
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+}
+@media (min-width: calc(40.5em + 250px)) {
+	body.attachSidebar #prompt-container {
+		min-width: 36em;
+		max-width: 36em;
+	}
+}
+
+#prompt-area, #prompt-overlay {
+	flex: 1;
+	border: none;
+	outline: none;
+	resize: none;
+	background: var(--color-base-100);
+	color: var(--color-base-10);
+	padding: 2em 3em;
+	margin: 0;
+	scrollbar-gutter: stable;
+	font: inherit;
+	box-sizing: content-box;
+	text-size-adjust: 100%;
+	-webkit-text-size-adjust: 100%;
+	-moz-text-size-adjust: 100%;
+	/*white-space: break-spaces;*/
+	word-wrap: break-word;
+}
+html.monospace-dark #prompt-area,
+html.monospace-dark #memory-area,
+html.monospace-dark #an-area,
+html.monospace-dark .expanded-text-area-settings,
+html.monospace-dark .wi-textarea {
+	background: var(--color-bg);
+	color: var(--color-text);
+}
+html.nockoffAI #prompt-area {
+	text-indent: 1em each-line;
+	background: var(--color-prompt-area);
+	color: var(--color-text);
+}
+html.nockoffAI #memory-area,
+html.nockoffAI #an-area,
+html.nockoffAI .expanded-text-area-settings,
+html.nockoffAI .wi-textarea {
+	background: var(--color-input);
+	color: var(--color-text);
+}
+.modal .wi-textarea {
+	resize:vertical;
+	background: var(--color-base-100);
+	color: var(--color-base-10);
+}
+
+#memory-area, #an-area, .expanded-text-area-settings, .wi-textarea {
+	flex: 1;
+	border: none;
+	outline: none;
+	resize: none;
+	background: var(--color-base-100);
+	color: var(--color-base-10);
+	padding: 0.5em;
+	scrollbar-gutter: stable;
+	font-family: inherit;
+	border-radius: 2px;
+}
+#memory-area {
+	min-height:9.5em;
+}
+#an-area {
+	min-height:3.5em;
+}
+.wi-textarea {
+	min-height: 4em;
+}
+
+#advancedContextPlaceholders {
+	background: var(--color-base-30);
+	margin: 1em auto;
+	padding: .25em;
+	border-radius: 2px;
+	width: fit-content;
+}
+#advancedContextPlaceholders table {
+	border-color: var(--color-base-80);
+}
+#advancedContextPlaceholders th,
+#advancedContextPlaceholders td {
+	text-align: center;
+	padding: 0.15em;
+}
+#advancedContextPlaceholders td {
+	user-select:all;
+}
+
+#advanced-context-order-settings {
+	min-height: 3.5em;
+}
+
+.expanded-text-area-settings {
+	margin: 8px 0 8px 0;
+	width:100%;
+	box-sizing: border-box;
+	height:25.5em;
+}
+
+#prompt-overlay {
+	white-space: pre-wrap;
+	position: absolute;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	transform: translate(0px, 0px);
+	background: transparent;
+	color: transparent;
+	pointer-events: none;
+	user-select: none;
+	-ms-user-select: none;
+	-webkit-user-select: none;
+	overflow: hidden;
+}
+
+#prompt-container:hover #prompt-overlay > .machine {
+	background: color-mix(in srgb, var(--color-miku) 10%, transparent);
+}
+#prompt-container #prompt-overlay > .machine.erase {
+	background: color-mix(in srgb, #FF0000 10%, transparent);
+}
+#prompt-container #prompt-overlay > .machine.current {
+	border-radius: 3px;
+	outline: 1px solid var(--color-base-50);
+	outline-offset: 1px;
+}
+
+#probs {
+	position: absolute;
+	background: var(--color-base-30);
+	top: var(--probs-top);
+	left: var(--probs-left);
+	display: flex;
+	transform: translate(-50%, -100%);
+	border-radius: 5px;
+	box-shadow: 0 1px 1px 1px #00000033;
+	z-index: 9999;
+}
+html.monospace-dark #probs,
+html.nockoffAI #probs {
+	background: var(--color-base-10);
+	border: 1px solid var(--token-prob-box);
+	border-radius: 4px;
+	box-shadow: none;
+}
+#probs > button {
+	cursor: pointer;
+	background: transparent;
+	color: var(--color-light);
+	border-radius: 0;
+	padding: 4px 8px;
+	display: flex;
+	flex-direction: column;
+	flex: none;
+	font-size: 1rem;
+}
+#probs > button:first-child {
+	border-radius: 5px 0 0 5px;
+	padding-left: 6px;
+}
+#probs > button:last-child {
+	border-radius: 0 5px 5px 0;
+	padding-right: 6px;
+}
+#probs > button:hover {
+	background: var(--color-base-40);
+}
+#probs > button:active {
+	background: var(--color-base-50);
+}
+#probs > button > .prob {
+	font-size: 0.8rem;
+}
+
+.modal-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(0, 0, 0, 0.65);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.modal-container {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.modal {
+	color: var(--color-light);
+	position: relative;
+	background: var(--color-base-50);
+	width: 75%;
+	max-height: 80vh;
+	padding: 1em;
+	border-radius: 5px;
+	display: flex;
+	flex-direction: column;
+}
+html.monospace-dark .modal {
+	background: #282833;
+}
+html.nockoffAI .modal {
+	background: var(--color-sidebar);
+	color:var(--color-base-50);
+}
+html.nockoffAI .modal-title {
+	color:var(--color-text);
+}
+html.nockoffAI  #context-order-desc,
+html.nockoffAI .modal-desc {
+	color:var(--color-base-80);
+}
+.modal-content {
+	overflow-y: auto;
+}
+
+.button-modal-top {
+	all:unset;
+	position: absolute;
+	top:1em;
+	right:1em;
+	width:1.25em;
+	height:1.25em;
+	border-radius: 3px;
+}
+.modal-title {
+	font-size: 150%;
+	font-weight:bold;
+	margin-bottom: .25em;
+}
+
+hr {
+	border:unset;
+	border-top: 1px solid var(--color-base-40);
+	margin: 0.75em -1em 0.5em;
+}
+
+
+/* world info */
+
+.modal-wi-content {
+	display: flex;
+	flex-direction:column;
+	overflow-y: auto;
+}
+
+#modal-wi-global{
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+#button-wi-new {
+	width: 100%;
+}
+.modal-wi-content{
+	margin-top:0.5em;
+}
+
+.wi-entry {
+	margin: 4px 0;
+}
+
+.wi-entry-controls {
+	display: grid;
+	grid-template-columns: min-content 1fr;
+	grid-template-rows: min-content 1fr;
+	border-top: 1px solid var(--color-base-40);
+	padding-top: 8px;
+	grid-template-areas:
+	  "wi-entry-filler wi-entry-name ."
+	  "wi-entry-buttons wi-entry-text ."
+}
+.wi-entry-filler { grid-area: wi-entry-filler; }
+.wi-entry-name {
+	grid-area: wi-entry-name;
+	margin-bottom:8px;
+}
+.wi-entry-name input {
+	background: var(--color-base-60);
+	font-weight:bold !important;
+	font-size: 1.2rem !important;
+}
+html.nockoffAI .wi-entry-name input {
+	background: var(--color-base-10) !important;
+}
+
+.wi-entry-buttons {
+	grid-area: wi-entry-buttons;
+	margin-right: 4px; /* because gap sucks */
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.wi-entry-buttons-container {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	height: 5em;
+}
+.wi-entry-buttons button {
+	display: grid;
+	width:2em;
+	height:fit-content;
+}
+
+.wi-entry-text {
+	grid-area: wi-entry-text;
+}
+.wi-entry-text .hbox {
+	grid-area: wi-entry-text;
+	margin-bottom:4px;
+}
+
+#sidebar {
+	font-family: inherit;
+	width: 250px;
+	background: var(--color-base-50);
+	color: var(--color-light);
+	padding: 4px 8px;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	overflow: auto;
+	max-height: calc(100vh - 8px);
+}
+
+#sidebar2 {
+	
+	float: right;
+	font-family: inherit;
+	width: 250px;
+	background: var(--color-base-50);
+	color: var(--color-light);
+	padding: 4px 8px;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	overflow: auto;
+	max-height: calc(100vh - 8px);
+}
+
+html.monospace-dark #sidebar {
+	background: #282833;
+}
+html.nockoffAI #sidebar {
+	background: var(--color-sidebar);
+	color: var(--color-base-50);
+}
+
+.hbox {
+	flex: none;
+	display: grid;
+	grid: auto / auto-flow minmax(min-content, 1fr);
+	gap: 8px;
+}
+.vbox {
+	flex: none;
+	display: grid;
+	grid: auto / minmax(min-content, 1fr) auto-flow;
+	grid-template-rows: 0fr 0fr 0fr 0fr;
+	gap: 4px;
+}
+
+.InputBox, .SelectBox, .TextArea {
+	display: flex;
+	position: relative;
+	flex-direction: column;
+	font-size: 0.75rem;
+	padding: 0 8px;
+}
+.InputBox > input, .SelectBox > select, .TextArea > textarea {
+	appearance: none;
+	border: none;
+	outline: none;
+	width: 100%;
+	box-sizing: content-box;
+	font: inherit;
+	font-size: 1rem;
+	padding: 4px 8px;
+	margin: 0 -8px;
+	border-radius: 2px;
+	color: inherit;
+	background: var(--color-base-30);
+	flex: none;
+}
+
+html.monospace-dark .InputBox > input, html.monospace-dark .SelectBox > select,
+html.nockoffAI .InputBox > input, html.nockoffAI .SelectBox > select {
+	color: var(--color-light);
+}
+
+.InputBox > input:read-only {
+	background: var(--color-base-60);
+}
+html.monospace-dark .InputBox > input:read-only {
+	background: var(--color-base-30);
+}
+html.nockoffAI .InputBox > input:read-only {
+	background: var(--color-disabled);
+}
+html.nockoffAI .SelectBox > select,
+html.nockoffAI .collapsible-header,
+html.nockoffAI .InputBox > input {
+	background: var(--color-input);
+}
+html.nockoffAI .horz-separator {
+	border-top: 3px dotted color-mix(in oklch, var(--color-base-100) 90%, var(--color-light));
+}
+
+.InputBox > input:focus-visible {
+	outline: 1px solid var(--color-base-0);
+}
+.SelectBox > select:disabled {
+	background: var(--color-base-60);
+}
+html.nockoffAI .SelectBox > select:disabled {
+	background: var(--color-disabled);
+}
+
+.Checkbox {
+	user-select: none;
+	margin: 0 5px 0 0;
+	vertical-align: middle;
+	position: relative;
+  	bottom: .08em;
+}
+
+.InputBox > input.mixed-content {
+	outline: 1px solid yellow;
+}
+.InputBox > input.rejected {
+	outline: 1px solid #ff3131;
+}
+
+.tooltip {
+	position: relative;
+}
+.tooltip .tooltiptext {
+	white-space: pre-wrap;
+	pointer-events: none;
+	width: 95%;
+	background-color: #000000AA;
+	color: var(--color-light);
+	text-align: center;
+	padding: 5px 4px;
+	margin: 0 -8px;
+	border-radius: 6px;
+	opacity: 0;
+	transition: opacity 0.3s;
+
+	position: absolute;
+	z-index: 1;
+	transform: translate(0, -75%);
+}
+html.monospace-dark .tooltip .tooltiptext {
+	transform: translate(0, -65%);
+}
+.tooltip .tooltiptext.short {
+	transform: translate(0, -45%);
+}
+html.monospace-dark .tooltip .tooltiptext.short {
+	transform: translate(0, -65%);
+}
+.tooltip:hover .tooltiptext {
+	opacity: 1;
+}
+
+.error-text {
+	width: max-content;
+	text-align: center;
+	background: #4E3534;
+	border-radius: 4px;
+	color: #FF8080;
+	margin-left: auto;
+	margin-right: auto;
+	padding: 2px 10px;
+}
+
+button {
+	appearance: none;
+	border: none;
+	outline: none;
+	font: inherit;
+	padding: 4px 8px;
+	color: inherit;
+	background: var(--color-base-30);
+	border-radius: 2px;
+}
+html.nockoffAI button {
+	background: var(--color-button);
+	color: var(--color-base-90);
+}
+html.nockoffAI .Session button:not(:hover),
+html.nockoffAI button.textAreaSettings:not(:hover) {
+	background: none;
+}
+button.textAreaSettings {
+	all: unset;
+	color: var(--color-base-50);
+	width:1.25em;
+	position:absolute;
+	top:calc(1.25em + 1px);
+	right:1px;
+}
+button:hover {
+	background: var(--color-base-40);
+}
+html.nockoffAI button:hover {
+	background: var(--color-button-hover);
+}
+button:active {
+	background: var(--color-base-50);
+}
+button:disabled {
+	background: var(--color-base-60);
+}
+html.nockoffAI button:disabled {
+	background: var(--color-disabled);
+}
+button:focus-visible {
+	outline: 1px solid var(--color-base-0);
+}
+button.processing {
+	outline: 1px solid rgba(255, 255, 255, 0.5);
+	animation: .5s ease-out infinite alternate processing;
+}
+@keyframes processing {
+	from { outline-width: 0px; }
+	to { outline-width: 4px; }
+}
+button.completing {
+	outline: 1px solid limegreen;
+	animation: .5s ease-out infinite alternate completing;
+}
+@keyframes completing {
+	from { outline-width: 0px; }
+	to { outline-width: 4px; }
+}
+
+.buttons {
+	display: flex;
+	gap: 8px;
+	justify-content: center;
+}
+.buttons .shorts {
+	line-height: 0;
+}
+.buttons .shorts > button {
+	height: 100%;
+}
+
+.collapsible-group {
+	border: none;
+	outline: none;
+}
+
+.collapsible-header {
+	user-select: none;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	padding: 4px 8px;
+	color: inherit;
+	background-color: var(--color-base-30);
+	border-radius: 2px;
+}
+.collapsible-header svg {
+	margin-right: 5px;
+}
+
+.collapsible-content {
+	transform: scaleY(0);
+	transition: transform 0.15s ease-in-out 0s, max-height 0.15s ease-in-out 0s;
+	transform-origin: center top;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+.collapsible-content.expanded {
+	transform: scaleY(1);
+	margin-top: 4px;
+}
+
+.Sessions {
+	display: flex;
+	flex: auto;
+	flex-direction: row;
+	gap: 4px;
+}
+.Sessions > ul {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+	max-height: 200px;
+	overflow-y: auto;
+	width: 100%;
+	background: var(--color-base-40);
+}
+
+
+
+html.monospace-dark .Sessions > ul {
+	background: var(--color-base-20);
+}
+html.nockoffAI .Sessions > ul {
+	background: var(--color-input);
+}
+.Sessions.disabled > ul {
+	background: var(--color-base-50);
+	pointer-events: auto;
+}
+html.nockoffAI .Sessions.disabled > ul {
+	background: var(--color-disabled);
+}
+
+.Sessions > ul > li {
+	display: flex;
+	align-items: center;
+}
+.Sessions.disabled > ul > li {
+	pointer-events: none;
+}
+
+.Session {
+	width: 100%;
+	padding: 0.5rem;
+	padding-left: 0.8rem;
+	cursor: pointer;
+	display: flex;
+	word-break: break-word;
+	user-select: none;
+}
+html.nockoffAI .Session {
+	margin: 0.25rem;
+	padding: 0.25rem;
+	color: var(--color-base-70);
+}
+html.nockoffAI .Session > input {
+	background-color: var(--color-input);
+	outline: none;
+}
+html.nockoffAI .Session.selected {
+	color: var(--color-text);
+	background-color: var(--color-prompt-area)
+}
+.Session:hover {
+	background-color: var(--color-base-60);
+}
+html.monospace-dark .Session:hover {
+	background-color: var(--color-base-40);
+}
+html.nockoffAI .Session:hover {
+	background-color: var(--color-hover);
+}
+.Session.selected {
+	background-color: var(--color-base-30);
+}
+html.monospace-dark .Session.selected {
+	background-color: var(--color-base-10);
+}
+
+.Session > button {
+	margin-left: 4px;
+	padding: 0;
+	background: none;
+	border: none;
+	cursor: pointer;
+	outline: none;
+	line-height: 0;
+	opacity: 0.5;
+}
+.Session > button:hover {
+	opacity: 1;
+}
+
+.Session > input {
+	padding: 0;
+	appearance: none;
+	border: none;
+	outline: 1px solid var(--color-light);
+	background-color: var(--color-base-40);
+	font: inherit;
+	color: inherit;
+	width: 80%;
+	margin-right: 5%;
+}
+
+.flex-separator {
+	margin-left: auto;
+}
+
+.horz-separator {
+	border-top: 3px dotted var(--color-base-60);
+}
+html.monospace-dark .horz-separator {
+	border-top: 3px dotted var(--color-base-20);
+}
+.image-upload-container {
+    margin-top: 20px; 
+}
