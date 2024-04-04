@@ -623,14 +623,11 @@ function CollapsibleGroup({ label, expanded, children }) {
 			</div>
 		</div>
 		`;
+        
 	}
 
-	document.addEventListener('DOMContentLoaded', (event) => {
-            const savedImage = localStorage.getItem('backgroundImage');
-            if (savedImage) {
-                document.documentElement.style.setProperty('--custom-bg-image', `url(${savedImage})`);
-            }
-        });
+	
+      
 
 function Sessions({ sessionStorage, onSessionChange, disabled }) {
 	const [version, setVersion] = useState(0);
@@ -647,7 +644,12 @@ function Sessions({ sessionStorage, onSessionChange, disabled }) {
 			sessionStorage.onsessionchange = null;
 		};
 	}, []);
-
+    useEffect(() => {
+        const savedImage = localStorage.getItem('backgroundImage');
+        if (savedImage) {
+          document.documentElement.style.setProperty('--custom-bg-image', `url(${savedImage})`);
+        }
+      }, []);
 	const switchSession = async (sessionId) => {
 		if (sessionStorage.selectedSession != sessionId) {
 			await sessionStorage.switchSession(sessionId);
@@ -1608,6 +1610,7 @@ export function App({ sessionStorage, useSessionState }) {
 		document.documentElement.classList.remove('serif-dark');
 		document.documentElement.classList.remove('monospace-dark');
 		document.documentElement.classList.remove('nockoffAI');
+        document.documentElement.classList.remove('infermatic');
 		switch (theme) {
 		case 1:
 			document.documentElement.classList.add('serif-dark');
@@ -1617,6 +1620,10 @@ export function App({ sessionStorage, useSessionState }) {
 			break;
 		case 3:
 			document.documentElement.classList.add('nockoffAI');
+			break;
+
+        case 4:
+			document.documentElement.classList.add('infermatic');
 			break;
 		}
 	}, [theme]);
@@ -2003,10 +2010,9 @@ export function App({ sessionStorage, useSessionState }) {
 				<${Sessions} sessionStorage=${sessionStorage}
 					disabled=${!!cancel}
 					onSessionChange=${onSessionChange}/>
-					<div class="image-upload-container">
-						<label for="image-upload" class="image-upload-label">Upload Image</label>
-						<input type="file" id="image-upload" name="image-upload" accept="image/*"onchange="backgroundImage(this)"/>
-    				</div>
+                    <div>
+                    <input type="file" accept="image/*" onchange=${(e) => updateBackgroundImage(e.target)} />
+                </div>
 			</container>
 			${!!tokens && html`
 				<${InputBox} label="Tokens" value=${tokens} readOnly/>`}

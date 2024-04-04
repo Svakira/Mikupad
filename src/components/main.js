@@ -1,10 +1,7 @@
-
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { html } from 'htm/react';
 import { SVResizeObserver } from 'scrollview-resize';
-
-document.addEventListener('DOMContentLoaded', () => {
 
 // Polyfill for piece of shit Chromium
 if (!(Symbol.asyncIterator in ReadableStream.prototype)) {
@@ -23,6 +20,59 @@ if (!(Symbol.asyncIterator in ReadableStream.prototype)) {
 	};
 }
 
+export async function getTokenCount({ endpoint, endpointAPI, endpointAPIKey, signal, ...options }) {
+	switch (endpointAPI) {
+		case 0: // llama.cpp
+			return await llamaCppTokenCount({ endpoint, endpointAPIKey, signal, ...options });
+		case 2: // koboldcpp
+			return await koboldCppTokenCount({ endpoint, signal, ...options });
+		case 3: // openai // TODO: Fix this for official OpenAI?
+			let tokenCount = 0;
+			// tokenCount = await openaiOobaTokenCount({ endpoint, signal, ...options });
+			// if (tokenCount != -1)
+			// 	return tokenCount;
+			// tokenCount = await openaiTabbyTokenCount({ endpoint, endpointAPIKey, signal, ...options });
+			// if (tokenCount != -1)
+			// 	return tokenCount;
+			// return 0;
+			return 0;
+	}
+}
+
+export async function getModels({ endpoint, endpointAPI, endpointAPIKey, signal, ...options }) {
+	switch (endpointAPI) {
+		case 3: // openai
+			return await openaiModels({ endpoint, endpointAPIKey, signal, ...options });
+		case 3: // infermatic
+			return await infermaticModels({ endpointAPIKey, signal, ...options });
+		default:
+			return [];
+	}
+}
+
+export async function* completion({ endpoint, endpointAPI, endpointAPIKey, signal, ...options }) {
+	switch (endpointAPI) {
+		case 0: // llama.cpp
+			return yield* await llamaCppCompletion({ endpoint, endpointAPIKey, signal, ...options });
+		case 2: // koboldcpp
+			return yield* await koboldCppCompletion({ endpoint, signal, ...options });
+		case 3: // openai
+			return yield* await openaiCompletion({ endpoint, endpointAPIKey, signal, ...options });
+			case 4: // infermatic
+			return yield* await infermaticCompletion({ endpointAPIKey, signal, ...options });
+	}
+}
+
+export async function abortCompletion({ endpoint, endpointAPI }) {
+	switch (endpointAPI) {
+		case 2: // koboldcpp
+			return await koboldCppAbortCompletion({ endpoint });
+		case 3: // openai (ooba)
+			return await openaiOobaAbortCompletion({ endpoint });
+		case 4: // infermatic (ooba)
+			return await infermaticOobaAbortCompletion({ endpoint });
+	}
+}
 
 // Function to parse text/event-stream data and yield JSON objects
 // Function to parse text/event-stream data and yield JSON objects
@@ -130,6 +180,7 @@ async function koboldCppTokenCount({ endpoint, signal, ...options }) {
 	const { value } = await res.json();
 	return value;
 }
+
 function koboldCppConvertOptions(options) {
 	const swapOption = (lhs, rhs) => {
 		if (lhs in options) {
@@ -501,6 +552,7 @@ function Checkbox({ label, value, onValueChange, ...props }) {
 			${label}
 		</label>`;
 }
+
 function CollapsibleGroup({ label, expanded, children }) {
 	const contentArea = useRef(null);
 	const [contentHeight, setContentHeight] = useState(!expanded ? 0 : '');
@@ -696,15 +748,15 @@ function Sessions({ sessionStorage, onSessionChange, disabled }) {
 	function updateBackgroundImage(input) {
     if (input.files && input.files[0]) {
         var reader = new FileReader();
-        
+
         reader.onload = function (e) {
             // Establece la imagen de fondo.
             document.documentElement.style.setProperty('--custom-bg-image', `url(${e.target.result})`);
-            
+
             // Guarda la imagen codificada en base64 en localStorage
             localStorage.setItem('backgroundImage', e.target.result);
         };
-        
+
         reader.readAsDataURL(input.files[0]);
     }
 }
@@ -716,7 +768,6 @@ function Sessions({ sessionStorage, onSessionChange, disabled }) {
 
 	const confirmSvg = html`<svg width="16" height="16" viewBox="0 0 128 128"><circle cx="64" cy="64" r="64" fill="var(--color-dark)"/><path d="M54.3 97.2 24.8 67.7c-.4-.4-.4-1 0-1.4l8.5-8.5c.4-.4 1-.4 1.4 0L55 78.1l38.2-38.2c.4-.4 1-.4 1.4 0l8.5 8.5c.4.4.4 1 0 1.4L55.7 97.2c-.4.4-1 .4-1.4 0z" fill="var(--color-light)"/></svg>`;
 	const cancelSvg = html`<svg width="16" height="16" viewBox="0 0 128 128"><circle cx="64" cy="64" r="64" fill="var(--color-dark)"/><path d="M100.3 90.4 73.9 64l26.3-26.4c.4-.4.4-1 0-1.4l-8.5-8.5c-.4-.4-1-.4-1.4 0L64 54.1 37.7 27.8c-.4-.4-1-.4-1.4 0l-8.5 8.5c-.4.4-.4 1 0 1.4L54 64 27.7 90.3c-.4.4-.4 1 0 1.4l8.5 8.5c.4.4 1.1.4 1.4 0L64 73.9l26.3 26.3c.4.4 1.1.4 1.5.1l8.5-8.5c.4-.4.4-1 0-1.4z" fill="var(--color-light)"/></svg>`;
-
 
 	return html`
 		<div className="Sessions ${disabled ? 'disabled' : ''}">
@@ -778,7 +829,7 @@ function Sessions({ sessionStorage, onSessionChange, disabled }) {
 					<button disabled=${disabled} onClick=${cloneSession}>Clone</button>
 				</div>
 		</div>`;
-		
+
 }
 
 class SessionStorage {
@@ -1029,9 +1080,7 @@ class SessionStorage {
 const defaultPrompt = `[INST] <<SYS>>
 You are a talented writing assistant. Always respond by incorporating the instructions into expertly written prose that is highly detailed, evocative, vivid and engaging.
 <</SYS>>
-
 Write a story about Hatsune Miku and Kagamine Rin. [/INST]  Sure, how about this:
-
 Chapter 1
 `;
 
@@ -1138,610 +1187,6 @@ function usePersistentState(name, initialState) {
 	};
 
 	return [value, updateState];
-}
-
-
-	function isMixedContent() {
-		const isHttps = window.location.protocol == 'https:';
-		let url;
-		try {
-			url = new URL(endpoint);
-		} catch {
-			return false;
-		}
-		return isHttps && (url.protocol !== 'https:' && url.protocol !== 'wss:');
-	}
-
-	function onSessionChange() {
-		// TODO: Store the undo/redo in the session.
-		redoStack.current = [];
-		undoStack.current = [];
-		setUndoHovered(false);
-	}
-
-	const probs = useMemo(() =>
-		showProbs && promptChunks[currentPromptChunk?.index]?.completion_probabilities?.[0]?.probs,
-		[promptChunks, currentPromptChunk, showProbs]);
-
-	return html`
-	
-	
-	<div id="sidebar2" >
-			
-			<${SelectBox}
-				label="Theme"
-				value=${theme}
-				onValueChange=${setTheme}
-				options=${[
-					{ name: 'Serif Light', value: 0 },
-					{ name: 'Serif Dark', value: 1 },
-					{ name: 'Monospace Dark', value: 2 },
-					{ name: 'nockoffAI', value: 3 },
-					{ name: 'Infermatic', value: 4 },
-				]}/>
-			<div class="horz-separator"/>
-			<container>
-				<${Sessions} sessionStorage=${sessionStorage}
-					disabled=${!!cancel}
-					onSessionChange=${onSessionChange}/>
-					<div class="image-upload-container">
-						<label for="image-upload" class="image-upload-label">Upload Image</label>
-						<input type="file" id="image-upload" name="image-upload" accept="image/*"onchange="backgroundImage(this)"/>
-    				</div>
-			</container>
-			${!!tokens && html`
-				<${InputBox} label="Tokens" value=${tokens} readOnly/>`}
-			
-			${!!lastError && html`
-				<span className="error-text">${lastError}</span>`}
-		</div>
-		<div id="prompt-container" onMouseMove=${onPromptMouseMove}>
-			<button
-				className="textAreaSettings"
-				onClick=${() => toggleModal("prompt")}>
-
-				<svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="-1 -5 8 7" xmlns="http://www.w3.org/2000/svg"><path d="M0 0 3-3C3-4 3-5 5-5L4-4 5-3 6-4C6-2 5-2 4-2L1 1C0 2-1 1 0 0"></path></svg>
-			</button>
-			<textarea
-				ref=${promptArea}
-				readOnly=${!!cancel}
-				spellCheck=${spellCheck}
-				id="prompt-area"
-				onInput=${onInput}
-				onScroll=${onScroll}/>
-			<div ref=${promptOverlay} id="prompt-overlay" aria-hidden>
-				${highlightGenTokens || showProbsMode !== -1 ? html`
-					${promptChunks.map((chunk, i) => {
-						const isCurrent = currentPromptChunk && currentPromptChunk.index === i;
-						const isNextUndo = undoHovered && !!undoStack.current.length && undoStack.current.at(-1) <= i;
-						return html`
-							<span
-								key=${i}
-								data-promptchunk=${i}
-								className=${`${(!highlightGenTokens && !isCurrent) || chunk.type === 'user' ? 'user' : 'machine'} ${isCurrent ? 'current' : ''} ${isNextUndo ? 'erase' : ''}`}>
-								${(chunk.content === '\n' ? ' \n' : chunk.content) + (i === promptChunks.length - 1 && chunk.content.endsWith('\n') ? '\u00a0' : '')}
-							</span>`;
-					})}` : null}
-			</div>
-		
-		</div>
-
-
-		
-		
-		${probs ? html`
-			<div
-				id="probs"
-				style=${{
-					'display': 'none'
-				}}>
-				${probs.map((prob, i) =>
-					html`<button key=${i} onClick=${() => switchCompletion(currentPromptChunk?.index, prob.tok_str)}>
-						<div className="tok">${replaceUnprintableBytes(prob.tok_str)}</div>
-						<div className="prob">${(prob.prob * 100).toFixed(2)}%</div>
-					</button>`)}
-			</div>` : null}
-		<div id="sidebar">
-			<${CollapsibleGroup} label="Parameters" expanded>
-				${endpointAPI != 4 && html`
-					<${InputBox} label="Server"
-						className="${isMixedContent() ? 'mixed-content' : ''}"
-						tooltip="${isMixedContent() ? 'This URL might be blocked due to mixed content. If the prediction fails, download mikupad.html and run it locally.' : ''}"
-						readOnly=${!!cancel}
-						value=${endpoint}
-						onValueChange=${setEndpoint}/>
-						`}
-				<${SelectBox}
-					label="API"
-					disabled=${!!cancel}
-					value=${endpointAPI}
-					onValueChange=${switchEndpointAPI}
-					options=${[
-						{ name: 'llama.cpp', value: 0 },
-						/*{ name: 'legacy oobabooga', value: 1 },*/
-						{ name: 'koboldcpp', value: 2 },
-						{ name: 'openai-compatible', value: 3 },
-						{ name: 'infermatic AI', value: 4 },
-					]}/>
-				${(endpointAPI == 3 || endpointAPI == 0 || endpointAPI == 4 ) && html`
-					<${InputBox} label="API Key" type="password"
-						className="${rejectedAPIKey ? 'rejected' : ''}"
-						tooltip="${rejectedAPIKey ? 'This API Key was rejected by the backend.' : ''}"
-						tooltipSize="short"
-						readOnly=${!!cancel}
-						value=${endpointAPIKey}
-						onValueChange=${setEndpointAPIKey}/>`}
-				${(endpointAPI == 3 || endpointAPI==4) && html`
-					<${InputBox} label="Model"
-						datalist=${openaiModels}
-						readOnly=${!!cancel}
-						value=${endpointModel}
-						onValueChange=${setEndpointModel}/>`}
-				<${InputBox} label="Seed (-1 = random)" type="text" inputmode="numeric"
-					readOnly=${!!cancel} value=${seed} onValueChange=${setSeed}/>
-				<${InputBox} tooltip="Currently not accurate to the token count, it will be used as an estimate." label="Max Context Length" type="text" inputmode="numeric"
-					readOnly=${!!cancel} value=${contextLength} onValueChange=${setContextLength}/>
-				<${InputBox} label="Max Predict Tokens${endpointAPI != 0 ? ' (-1 = 1024)' : ' (-1 = infinite)'}" type="text" inputmode="numeric"
-					readOnly=${!!cancel} value=${maxPredictTokens} onValueChange=${setMaxPredictTokens}/>
-				<${InputBox} label="Stopping Strings (JSON array)" type="text" pattern="^\\[.*?\\]$"
-					className="${stoppingStringsError ? 'rejected' : ''}"
-					tooltip="${stoppingStringsError ? stoppingStringsError : ''}"
-					readOnly=${!!cancel}
-					value=${stoppingStrings}
-					onValueChange=${setStoppingStrings}/>
-			</${CollapsibleGroup}>
-			<${CollapsibleGroup} label="Sampling" expanded>
-				${(endpointAPI == 3 || endpointAPI == 4) && html`
-					<${Checkbox} label="Full OpenAI compliance"
-						disabled=${!!cancel} value=${openaiPresets} onValueChange=${setOpenaiPresets}/>`}
-				<${InputBox} label="Temperature" type="number" step="0.01"
-					readOnly=${!!cancel} value=${temperature} onValueChange=${setTemperature}/>
-				${(!openaiPresets || endpointAPI != 3 || endpointAPI != 4) && html`
-					<div className="hbox">
-						<${InputBox} label="DynaTemp Range" type="number" step="0.01"
-							readOnly=${!!cancel} value=${dynaTempRange} onValueChange=${setDynaTempRange}/>
-						${(endpointAPI != 2) && html`
-							<${InputBox} label="DynaTemp Exp" type="number" step="0.01"
-								readOnly=${!!cancel} value=${dynaTempExp} onValueChange=${setDynaTempExp}/>`}
-					</div>
-					<div className="hbox">
-						<${InputBox} label="Repeat penalty" type="number" step="0.01"
-							readOnly=${!!cancel} value=${repeatPenalty} onValueChange=${setRepeatPenalty}/>
-						<${InputBox} label="Repeat last n" type="number" step="1"
-							readOnly=${!!cancel} value=${repeatLastN} onValueChange=${setRepeatLastN}/>
-					</div>`}
-				${(endpointAPI == 0 || !openaiPresets ) && html`
-					${(endpointAPI != 1 && (!openaiPresets || endpointAPI != 3)) && html`
-						<${Checkbox} label="Penalize NL"
-							disabled=${!!cancel} value=${penalizeNl} onValueChange=${setPenalizeNl}/>`}
-					<div className="hbox">
-						<${InputBox} label="Presence penalty" type="number" step="0.01"
-							readOnly=${!!cancel} value=${presencePenalty} onValueChange=${setPresencePenalty}/>
-						<${InputBox} label="Frequency penalty" type="number" step="1"
-							readOnly=${!!cancel} value=${frequencyPenalty} onValueChange=${setFrequencyPenalty}/>
-					</div>`}
-				${temperature <= 0 ? null : html`
-					${(!openaiPresets || endpointAPI != 3 || endpointAPI != 4) && html`
-						<${SelectBox}
-							label="Mirostat"
-							disabled=${!!cancel}
-							value=${mirostat}
-							onValueChange=${setMirostat}
-							options=${[
-								{ name: 'Off', value: 0 },
-								{ name: 'Mirostat', value: 1 },
-								{ name: 'Mirostat 2.0', value: 2 },
-							]}/>`}
-					${(mirostat && (!openaiPresets || endpointAPI != 3 || endpointAPI != 4)) ? html`
-						<div className="hbox">
-							<${InputBox} label="Mirostat τ" type="number" step="0.01"
-								readOnly=${!!cancel} value=${mirostatTau} onValueChange=${setMirostatTau}/>
-							<${InputBox} label="Mirostat η" type="number" step="0.01"
-								readOnly=${!!cancel} value=${mirostatEta} onValueChange=${setMirostatEta}/>
-						</div>
-					` : html`
-						<div className="hbox">
-							${(!openaiPresets || endpointAPI != 3 || endpointAPI != 4) && html`
-								<${InputBox} label="Top K" type="number" step="1"
-									readOnly=${!!cancel} value=${topK} onValueChange=${setTopK}/>`}
-							<${InputBox} label="Top P" type="number" step="0.01"
-								readOnly=${!!cancel} value=${topP} onValueChange=${setTopP}/>
-							${(!openaiPresets || endpointAPI != 3) && html`
-								<${InputBox} label="Min P" type="number" step="0.01"
-									readOnly=${!!cancel} value=${minP} onValueChange=${setMinP}/>`}
-						</div>
-						${(!openaiPresets || endpointAPI != 3 || endpointAPI != 4) && html`
-							<div className="hbox">
-								<${InputBox} label="Typical p" type="number" step="0.01"
-									readOnly=${!!cancel} value=${typicalP} onValueChange=${setTypicalP}/>
-								<${InputBox} label="TFS z" type="number" step="0.01"
-									readOnly=${!!cancel} value=${tfsZ} onValueChange=${setTfsZ}/>
-							</div>`}
-					`}
-				`}
-				${(!openaiPresets || endpointAPI != 3 || endpointAPI != 4) && html`
-					<${Checkbox} label="Ignore <eos>"
-						disabled=${!!cancel} value=${ignoreEos} onValueChange=${setIgnoreEos}/>`}
-			</${CollapsibleGroup}>
-			<${CollapsibleGroup} label="Persistent Context">
-				<label className="TextArea">
-					Memory
-					<textarea
-					readOnly=${!!cancel}
-					placeholder="Anything written here will be injected at the head of the prompt. Tokens here DO count towards the Context Limit."
-					defaultValue=${memoryTokens.text}
-					value=${memoryTokens.text}
-					onInput=${(e) => handleMemoryTokensChange("text", e.target.value) }
-					id="memory-area"/>
-					<button
-					className="textAreaSettings"
-					disabled=${!!cancel}
-					onClick=${() => toggleModal("memory")}>
-
-					<svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="-1 -5 8 7" xmlns="http://www.w3.org/2000/svg"><path d="M0 0 3-3C3-4 3-5 5-5L4-4 5-3 6-4C6-2 5-2 4-2L1 1C0 2-1 1 0 0"></path></svg>
-					</button>
-				</label>
-				<label className="TextArea">
-					Author's Note
-					<textarea
-					readOnly=${!!cancel}
-					placeholder="Anything written here will be injected ${authorNoteDepth} newlines from bottom into context."
-					defaultValue=${authorNoteTokens.text}
-					value=${authorNoteTokens.text}
-					onInput=${(e) => handleauthorNoteTokensChange("text", e.target.value) }
-					id="an-area"/>
-					<button
-					className="textAreaSettings"
-					disabled=${!!cancel}
-					onClick=${() => toggleModal("an")}>
-					<svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="-1 -5 8 7" xmlns="http://www.w3.org/2000/svg"><path d="M0 0 3-3C3-4 3-5 5-5L4-4 5-3 6-4C6-2 5-2 4-2L1 1C0 2-1 1 0 0"></path></svg>
-					</button>
-				</label>
-				<button
-					id="viewWorldInfo"
-					disabled=${!!cancel}
-					onClick=${() => toggleModal("wi")}>
-					Show World Info
-				</button>
-				<button
-					id="viewContext"
-					disabled=${!!cancel}
-					onClick=${() => toggleModal("context")}>
-					Show Context
-				</button>
-
-			</${CollapsibleGroup}>
-			${!!tokens && html`
-				<${InputBox} label="Tokens" value=${tokens} readOnly/>`}
-			<div className="buttons">
-				<button
-					title="Run next prediction (Ctrl + Enter)"
-					className=${cancel ? (predictStartTokens === tokens ? 'processing' : 'completing') : ''}
-					disabled=${!!cancel || stoppingStringsError}
-					onClick=${() => predict()}>
-					Predict
-				</button>
-				<button
-					title="Cancel prediction (Escape)"
-					disabled=${!cancel}
-					onClick=${cancel}>
-					Cancel
-				</button>
-				<div className="shorts">
-				${!cancel && (!!undoStack.current.length || !!redoStack.current.length) && html`
-					<button
-						title="Regenerate (Ctrl + R)"
-						disabled=${!undoStack.current.length}
-						onClick=${() => undoAndPredict()}
-						onMouseEnter=${() => setUndoHovered(true)}
-						onMouseLeave=${() => setUndoHovered(false)}>
-						<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 40.499 40.5"><path d="M39.622,21.746l-6.749,6.75c-0.562,0.562-1.326,0.879-2.122,0.879s-1.56-0.316-2.121-0.879l-6.75-6.75		c-1.171-1.171-1.171-3.071,0-4.242c1.171-1.172,3.071-1.172,4.242,0l1.832,1.832C27.486,13.697,22.758,9.25,17,9.25		c-6.064,0-11,4.935-11,11c0,6.064,4.936,11,11,11c1.657,0,3,1.343,3,3s-1.343,3-3,3c-9.373,0-17-7.626-17-17s7.627-17,17-17		c8.936,0,16.266,6.933,16.936,15.698l1.442-1.444c1.172-1.172,3.072-1.172,4.242,0C40.792,18.674,40.792,20.574,39.622,21.746z" fill="var(--color-light)"/></svg>
-					</button>`}
-				</div>
-
-				<div className="shorts">
-					${!cancel && (!!undoStack.current.length || !!redoStack.current.length) && html`
-						<button
-							title="Undo (Ctrl + Z)"
-							disabled=${!undoStack.current.length}
-							onClick=${() => undo()}
-							onMouseEnter=${() => setUndoHovered(true)}
-							onMouseLeave=${() => setUndoHovered(false)}>
-							<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"><path d="M17.026 22.957c10.957-11.421-2.326-20.865-10.384-13.309l2.464 2.352h-9.106v-8.947l2.232 2.229c14.794-13.203 31.51 7.051 14.794 17.675z" fill="var(--color-light)"/></svg>
-						</button>`}
-					${!cancel && (!!undoStack.current.length || !!redoStack.current.length) && html`
-						<button
-							title="Redo (Ctrl + Y)"
-							disabled=${!redoStack.current.length}
-							onClick=${() => redo()}>
-							<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"><path d="M6.974 22.957c-10.957-11.421 2.326-20.865 10.384-13.309l-2.464 2.352h9.106v-8.947l-2.232 2.229c-14.794-13.203-31.51 7.051-14.794 17.675z" fill="var(--color-light)"/></svg>
-						</button>`}
-				</div>
-			</div>
-			${!!lastError && html`
-				<span className="error-text">${lastError}</span>`}
-		</div>
-
-		
-
-		<${Modal} isOpen=${modalState.prompt} onClose=${() => closeModal("prompt")}
-		title="Editor Preferences"
-		description=""
-		style=${{ 'width': '30%' }}>
-			<div className="vbox">
-				<${Checkbox} label="Enable spell checking"
-					value=${spellCheck} onValueChange=${setSpellCheck}/>
-				<${Checkbox} label="Attach sidebar"
-					value=${attachSidebar} onValueChange=${setAttachSidebar}/>
-				<${Checkbox} label="Highlight generated tokens"
-					value=${highlightGenTokens} onValueChange=${setHighlightGenTokens}/>
-				<${Checkbox} label="Preserve cursor position after prediction"
-					value=${preserveCursorPosition} onValueChange=${setPreserveCursorPosition}/>
-				<${SelectBox}
-					label="Token probabilities"
-					value=${showProbsMode}
-					onValueChange=${setShowProbsMode}
-					options=${[
-						{ name: 'Show on hover', value: 0 },
-						{ name: 'Show on hover while holding CTRL', value: 1 },
-						{ name: 'Don\'t show', value: -1 },
-					]}/>
-			</div>
-		</${Modal}>
-
-		<${Modal} isOpen=${modalState.memory} onClose=${() => closeModal("memory")}
-		title="Memory"
-		description="This text will be added at the very top of your context.
-		Prefix and suffix will be attached at the beginning or end of your memory respectively. \\n for newlines in pre/suffix.">
-			<div className="hbox">
-				<${InputBox} label="Prefix" type="text" placeholder="[INST]"
-					readOnly=${!!cancel} value=${memoryTokens.prefix} onValueChange=${(value) => handleMemoryTokensChange("prefix", value)}/>
-				<${InputBox} label="Suffix" type="text" placeholder="[/INST]"
-					readOnly=${!!cancel} value=${memoryTokens.suffix} onValueChange=${(value) => handleMemoryTokensChange("suffix", value)}/>
-			</div>
-			<textarea
-				readOnly=${!!cancel}
-				placeholder="Anything written here will be injected at the head of the prompt. Tokens here DO count towards the Context Limit."
-				defaultValue=${memoryTokens.text}
-				value=${memoryTokens.text}
-				onInput=${(e) => handleMemoryTokensChange("text", e.target.value) }
-				class="expanded-text-area-settings"
-				id="memory-area-settings"/>
-		</${Modal}>
-
-		<${Modal} isOpen=${modalState.an} onClose=${() => closeModal("an")}
-		title="Author's Note"
-		description="This text will be injected N newlines from the bottom of your prompt.
-		Prefix and suffix will be attached at the beginning or end of your author's note respectively. \\n for newlines in pre/suffix.">
-			<div className="hbox">
-				<${InputBox} label="Prefix" type="text" placeholder="[INST]"
-					readOnly=${!!cancel} value=${authorNoteTokens.prefix} onValueChange=${(value) => handleauthorNoteTokensChange("prefix", value)}/>
-				<${InputBox} label="Suffix" type="text" placeholder="[/INST]"
-					readOnly=${!!cancel} value=${authorNoteTokens.suffix} onValueChange=${(value) => handleauthorNoteTokensChange("suffix", value)}/>
-				<${InputBox} label="AN Injection Depth (0-N)" type="number" step="1"
-					readOnly=${!!cancel} value=${authorNoteDepth} onValueChange=${handleAuthorNoteDepthChange}/>
-			</div>
-
-			<textarea
-			readOnly=${!!cancel}
-			placeholder="Anything written here will be injected ${authorNoteDepth} newlines from bottom into context."
-			defaultValue=${authorNoteTokens.text}
-			value=${authorNoteTokens.text}
-			onInput=${(e) => handleauthorNoteTokensChange("text", e.target.value) }
-			class="expanded-text-area-settings"
-			id="expanded-an-settings"/>
-		</${Modal}>
-
-		<${Modal} isOpen=${modalState.context} onClose=${() => closeModal("context")}
-			title="Context"
-			description="This is the prompt being sent to your large language model.">
-		<${CollapsibleGroup} label="Advanced Context Ordering">
-			<div id="context-order-desc">
-				You can use the following placeholders to order the context according to your needs:<br />
-				<div id="advancedContextPlaceholders">
-					<table border="1" frame="void" rules="all">
-						<thead>
-						<tr>
-							<th></th>
-							<th>Prefix</th>
-							<th>Text</th>
-							<th>Suffix</th>
-						</tr>
-						</thead>
-						<tbody>
-						<tr>
-							<th>Memory</th>
-							<td>{memPrefix}</td>
-							<td>{memText}</td>
-							<td>{memSuffix}</td>
-						</tr>
-						<tr>
-							<th>World Info</th>
-							<td>{wiPrefix}</td>
-							<td>{wiText}</td>
-							<td>{wiSuffix}</td>
-						</tr>
-						<tr>
-							<th>Prompt</th>
-							<td></td>
-							<td>{prompt}</td>
-							<td></td>
-						</tr>
-						</tbody>
-					</table>
-				</div>
-				Any text that is not a placeholder will be added into the context as is.
-			</div>
-			<textarea
-				readOnly=${!!cancel}
-				placeholder=${defaultPresets.memoryTokens.contextOrder}
-				defaultValue=${memoryTokens.contextOrder}
-				value=${memoryTokens.contextOrder}
-				onInput=${(e) => handleMemoryTokensChange("contextOrder", e.target.value)}
-				class="expanded-text-area-settings"
-				id="advanced-context-order-settings"/>
-		</${CollapsibleGroup}>
-			<textarea
-			readOnly=${!!cancel}
-			value=${modifiedPrompt}
-			class="expanded-text-area-settings"
-			id="context-area-settings" readOnly/>
-		</${Modal}>
-
-		<${Modal} isOpen=${modalState.wi} onClose=${() => closeModal("wi")}
-			title="World Info"
-			description="Additional information that is added when specific keywords are found in context.
-			World info will be added at the top of your memory, in the order specified here.
-
-			Each entry will begin on a newline. Keys will be interpreted as case-insensitive regular expressions. Search Range specifies how many tokens back into the context will be searched for activation keys. Search range 0 to disable an entry.">
-			<div id="modal-wi-global">
-				<${CollapsibleGroup} label="Prefix/Suffix">
-					The prefix and suffix will be added at the beginning or end of all your active World Info entries respectively.
-					<br />
-					<div className="hbox">
-						<${InputBox} label="Prefix" type="text" placeholder="\\n"
-							readOnly=${!!cancel} value=${worldInfo.prefix} onValueChange=${(value) => handleWorldInfoAffixChange("prefix", value)}/>
-						<${InputBox} label="Suffix" type="text" placeholder="\\n"
-							readOnly=${!!cancel} value=${worldInfo.suffix} onValueChange=${(value) => handleWorldInfoAffixChange("suffix", value)}/>
-					</div>
-				</${CollapsibleGroup}>
-				<button id="button-wi-new" disabled=${!!cancel} onClick=${handleWorldInfoNew}>New Entry</button>
-			</div>
-			<div className="modal-wi-content">
-				${ !Array.isArray(worldInfo.entries) ? null : worldInfo.entries.map((entry, index) => html`
-				<div class="wi-entry" key=${index}>
-					<div class="wi-entry-controls">
-						<div class="wi-entry-filler" />
-						<div class="wi-entry-name">
-							<${InputBox}
-							label="Entry #${index+1}"
-							type="text"
-							readOnly=${!!cancel}
-							placeholder="Name of this entry"
-							value=${entry.displayName}
-							onValueChange=${(value) => handleWorldInfoChange("displayName",index,value)}
-							/>
-						</div>
-						<div class="wi-entry-buttons">
-							<div class="wi-entry-buttons-container">
-								<button disabled=${!!cancel} onClick=${() => handleWorldInfoMove(index,-1)}>
-									<svg fill="var(--color-light)" height="12" width="12" viewBox="0 0 330 330"><path d="M325.606,229.393l-150.004-150C172.79,76.58,168.974,75,164.996,75c-3.979,0-7.794,1.581-10.607,4.394 l-149.996,150c-5.858,5.858-5.858,15.355,0,21.213c5.857,5.857,15.355,5.858,21.213,0l139.39-139.393l139.397,139.393 C307.322,253.536,311.161,255,315,255c3.839,0,7.678-1.464,10.607-4.394C331.464,244.748,331.464,235.251,325.606,229.393z"/></svg>
-								</button>
-								<button disabled=${!!cancel} onClick=${() => handleWorldInfoDel(index)}>
-									✕
-								</button>
-								<button disabled=${!!cancel} onClick=${() => handleWorldInfoMove(index,1)}>
-									<svg fill="var(--color-light)" height="12" width="12" viewBox="0 0 330 330"><path d="M325.607,79.393c-5.857-5.857-15.355-5.858-21.213,0.001l-139.39,139.393L25.607,79.393 c-5.857-5.857-15.355-5.858-21.213,0.001c-5.858,5.858-5.858,15.355,0,21.213l150.004,150c2.813,2.813,6.628,4.393,10.606,4.393 s7.794-1.581,10.606-4.394l149.996-150C331.465,94.749,331.465,85.251,325.607,79.393z"/></svg>
-								</button>
-							</div>
-						</div>
-						<div class="wi-entry-text">
-							<div class="hbox">
-								<${InputBox}
-									label="Comma Separated RegEx Keys"
-									type="text"
-									readOnly=${!!cancel}
-									value=${entry.keys.join(',')}
-									placeholder="Required to activate entry"
-									onValueChange=${(value) => handleWorldInfoChange("keys",index,value)}
-									/>
-								<${InputBox}
-									label="Search Range (0 = disabled)"
-									tooltip="Currently not accurate to the token count, it will be used as an estimate."
-
-									type="text"
-									readOnly=${!!cancel}
-									inputmode="numeric"
-									value=${entry.search}
-									placeholder="2048"
-									onValueChange=${(value) => handleWorldInfoChange("search",index,value)}
-									/>
-							</div>
-							<label class="TextArea">
-								Text
-								<textarea
-									readOnly=${!!cancel}
-									placeholder="Information to be inserted into context when key is found"
-									value=${entry.text ? entry.text : ""}
-									defaultValue=${entry.text ? entry.text : ""}
-									onInput=${(e) => handleWorldInfoChange("text",index, e.target.value)}
-									class="wi-textarea" />
-							</label>
-							</div>
-						</div>
-					</div>
-				`)}
-			</div>
-		</${Modal}>
-	`;
-}
-
-
-
-async function main() {
-    const sessionStorage = new SessionStorage(defaultPresets);
-    await sessionStorage.init();
-
-    createRoot(document.body).render(html`
-        <${App}
-            sessionStorage=${sessionStorage}
-            useSessionState=${(name, initialState) => useSessionState(sessionStorage, name, initialState)}/>`);
-};
-
-
-export async function getTokenCount({ endpoint, endpointAPI, endpointAPIKey, signal, ...options }) {
-	switch (endpointAPI) {
-		case 0: // llama.cpp
-			return await llamaCppTokenCount({ endpoint, endpointAPIKey, signal, ...options });
-		case 2: // koboldcpp
-			return await koboldCppTokenCount({ endpoint, signal, ...options });
-		case 3: // openai // TODO: Fix this for official OpenAI?
-			let tokenCount = 0;
-			// tokenCount = await openaiOobaTokenCount({ endpoint, signal, ...options });
-			// if (tokenCount != -1)
-			// 	return tokenCount;
-			// tokenCount = await openaiTabbyTokenCount({ endpoint, endpointAPIKey, signal, ...options });
-			// if (tokenCount != -1)
-			// 	return tokenCount;
-			// return 0;
-			return 0;
-	}
-}
-
-export async function getModels({ endpoint, endpointAPI, endpointAPIKey, signal, ...options }) {
-	switch (endpointAPI) {
-		case 3: // openai
-			return await openaiModels({ endpoint, endpointAPIKey, signal, ...options });
-		case 3: // infermatic
-			return await infermaticModels({ endpointAPIKey, signal, ...options });
-		default:
-			return [];
-	}
-}
-
-
-export async function* completion({ endpoint, endpointAPI, endpointAPIKey, signal, ...options }) {
-	switch (endpointAPI) {
-		case 0: // llama.cpp
-			return yield* await llamaCppCompletion({ endpoint, endpointAPIKey, signal, ...options });
-		case 2: // koboldcpp
-			return yield* await koboldCppCompletion({ endpoint, signal, ...options });
-		case 3: // openai
-			return yield* await openaiCompletion({ endpoint, endpointAPIKey, signal, ...options });
-			case 4: // infermatic
-			return yield* await infermaticCompletion({ endpointAPIKey, signal, ...options });
-	}
-}
-
-export async function abortCompletion({ endpoint, endpointAPI }) {
-	switch (endpointAPI) {
-		case 2: // koboldcpp
-			return await koboldCppAbortCompletion({ endpoint });
-		case 3: // openai (ooba)
-			return await openaiOobaAbortCompletion({ endpoint });
-		case 4: // infermatic (ooba)
-			return await infermaticOobaAbortCompletion({ endpoint });
-	}
 }
 
 export function App({ sessionStorage, useSessionState }) {
@@ -2491,7 +1936,7 @@ export function App({ sessionStorage, useSessionState }) {
             }
             url.port = 8080;
             setEndpoint(url.toString());
-			
+
             break;
         case 2: // koboldcpp
             if (url.protocol !== 'http:' && url.protocol !== 'https:') {
@@ -2499,14 +1944,14 @@ export function App({ sessionStorage, useSessionState }) {
             }
             url.port = 5001;
             setEndpoint(url.toString());
-			
+
             break;
         case 3: // openai-compatible or any other case that does not require changing the endpoint
             if (url.protocol !== 'http:' && url.protocol !== 'https:') {
                 url.protocol = 'http:';
             }
             setEndpoint(url.toString());
-			
+
 
             break;
         case 4: // infermaticAPI
@@ -2515,4 +1960,534 @@ export function App({ sessionStorage, useSessionState }) {
     }
 	console.log('Endpoint after setting:', endpoint);
     setEndpointAPI(value);
+}
+	function isMixedContent() {
+		const isHttps = window.location.protocol == 'https:';
+		let url;
+		try {
+			url = new URL(endpoint);
+		} catch {
+			return false;
+		}
+		return isHttps && (url.protocol !== 'https:' && url.protocol !== 'wss:');
 	}
+
+	function onSessionChange() {
+		// TODO: Store the undo/redo in the session.
+		redoStack.current = [];
+		undoStack.current = [];
+		setUndoHovered(false);
+	}
+
+	const probs = useMemo(() =>
+		showProbs && promptChunks[currentPromptChunk?.index]?.completion_probabilities?.[0]?.probs,
+		[promptChunks, currentPromptChunk, showProbs]);
+
+	return html`
+	
+	<div id="sidebar2" >
+			
+			<${SelectBox}
+				label="Theme"
+				value=${theme}
+				onValueChange=${setTheme}
+				options=${[
+					{ name: 'Serif Light', value: 0 },
+					{ name: 'Serif Dark', value: 1 },
+					{ name: 'Monospace Dark', value: 2 },
+					{ name: 'nockoffAI', value: 3 },
+					{ name: 'Infermatic', value: 4 },
+				]}/>
+			<div class="horz-separator"/>
+			<container>
+				<${Sessions} sessionStorage=${sessionStorage}
+					disabled=${!!cancel}
+					onSessionChange=${onSessionChange}/>
+					<div class="image-upload-container">
+						<label for="image-upload" class="image-upload-label">Upload Image</label>
+						<input type="file" id="image-upload" name="image-upload" accept="image/*"onchange="backgroundImage(this)"/>
+    				</div>
+			</container>
+			${!!tokens && html`
+				<${InputBox} label="Tokens" value=${tokens} readOnly/>`}
+			
+			${!!lastError && html`
+				<span className="error-text">${lastError}</span>`}
+		</div>
+		<div id="prompt-container" onMouseMove=${onPromptMouseMove}>
+			<button
+				className="textAreaSettings"
+				onClick=${() => toggleModal("prompt")}>
+				<svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="-1 -5 8 7" xmlns="http://www.w3.org/2000/svg"><path d="M0 0 3-3C3-4 3-5 5-5L4-4 5-3 6-4C6-2 5-2 4-2L1 1C0 2-1 1 0 0"></path></svg>
+			</button>
+			<textarea
+				ref=${promptArea}
+				readOnly=${!!cancel}
+				spellCheck=${spellCheck}
+				id="prompt-area"
+				onInput=${onInput}
+				onScroll=${onScroll}/>
+			<div ref=${promptOverlay} id="prompt-overlay" aria-hidden>
+				${highlightGenTokens || showProbsMode !== -1 ? html`
+					${promptChunks.map((chunk, i) => {
+						const isCurrent = currentPromptChunk && currentPromptChunk.index === i;
+						const isNextUndo = undoHovered && !!undoStack.current.length && undoStack.current.at(-1) <= i;
+						return html`
+							<span
+								key=${i}
+								data-promptchunk=${i}
+								className=${`${(!highlightGenTokens && !isCurrent) || chunk.type === 'user' ? 'user' : 'machine'} ${isCurrent ? 'current' : ''} ${isNextUndo ? 'erase' : ''}`}>
+								${(chunk.content === '\n' ? ' \n' : chunk.content) + (i === promptChunks.length - 1 && chunk.content.endsWith('\n') ? '\u00a0' : '')}
+							</span>`;
+					})}` : null}
+			</div>
+		
+		</div>
+		
+		
+		${probs ? html`
+			<div
+				id="probs"
+				style=${{
+					'display': 'none'
+				}}>
+				${probs.map((prob, i) =>
+					html`<button key=${i} onClick=${() => switchCompletion(currentPromptChunk?.index, prob.tok_str)}>
+						<div className="tok">${replaceUnprintableBytes(prob.tok_str)}</div>
+						<div className="prob">${(prob.prob * 100).toFixed(2)}%</div>
+					</button>`)}
+			</div>` : null}
+		<div id="sidebar">
+			<${CollapsibleGroup} label="Parameters" expanded>
+				${endpointAPI != 4 && html`
+					<${InputBox} label="Server"
+						className="${isMixedContent() ? 'mixed-content' : ''}"
+						tooltip="${isMixedContent() ? 'This URL might be blocked due to mixed content. If the prediction fails, download mikupad.html and run it locally.' : ''}"
+						readOnly=${!!cancel}
+						value=${endpoint}
+						onValueChange=${setEndpoint}/>
+						`}
+				<${SelectBox}
+					label="API"
+					disabled=${!!cancel}
+					value=${endpointAPI}
+					onValueChange=${switchEndpointAPI}
+					options=${[
+						{ name: 'llama.cpp', value: 0 },
+						/*{ name: 'legacy oobabooga', value: 1 },*/
+						{ name: 'koboldcpp', value: 2 },
+						{ name: 'openai-compatible', value: 3 },
+						{ name: 'infermatic AI', value: 4 },
+					]}/>
+				${(endpointAPI == 3 || endpointAPI == 0 || endpointAPI == 4 ) && html`
+					<${InputBox} label="API Key" type="password"
+						className="${rejectedAPIKey ? 'rejected' : ''}"
+						tooltip="${rejectedAPIKey ? 'This API Key was rejected by the backend.' : ''}"
+						tooltipSize="short"
+						readOnly=${!!cancel}
+						value=${endpointAPIKey}
+						onValueChange=${setEndpointAPIKey}/>`}
+				${(endpointAPI == 3 || endpointAPI==4) && html`
+					<${InputBox} label="Model"
+						datalist=${openaiModels}
+						readOnly=${!!cancel}
+						value=${endpointModel}
+						onValueChange=${setEndpointModel}/>`}
+				<${InputBox} label="Seed (-1 = random)" type="text" inputmode="numeric"
+					readOnly=${!!cancel} value=${seed} onValueChange=${setSeed}/>
+				<${InputBox} tooltip="Currently not accurate to the token count, it will be used as an estimate." label="Max Context Length" type="text" inputmode="numeric"
+					readOnly=${!!cancel} value=${contextLength} onValueChange=${setContextLength}/>
+				<${InputBox} label="Max Predict Tokens${endpointAPI != 0 ? ' (-1 = 1024)' : ' (-1 = infinite)'}" type="text" inputmode="numeric"
+					readOnly=${!!cancel} value=${maxPredictTokens} onValueChange=${setMaxPredictTokens}/>
+				<${InputBox} label="Stopping Strings (JSON array)" type="text" pattern="^\\[.*?\\]$"
+					className="${stoppingStringsError ? 'rejected' : ''}"
+					tooltip="${stoppingStringsError ? stoppingStringsError : ''}"
+					readOnly=${!!cancel}
+					value=${stoppingStrings}
+					onValueChange=${setStoppingStrings}/>
+			</${CollapsibleGroup}>
+			<${CollapsibleGroup} label="Sampling" expanded>
+				${(endpointAPI == 3 || endpointAPI == 4) && html`
+					<${Checkbox} label="Full OpenAI compliance"
+						disabled=${!!cancel} value=${openaiPresets} onValueChange=${setOpenaiPresets}/>`}
+				<${InputBox} label="Temperature" type="number" step="0.01"
+					readOnly=${!!cancel} value=${temperature} onValueChange=${setTemperature}/>
+				${(!openaiPresets || endpointAPI != 3 || endpointAPI != 4) && html`
+					<div className="hbox">
+						<${InputBox} label="DynaTemp Range" type="number" step="0.01"
+							readOnly=${!!cancel} value=${dynaTempRange} onValueChange=${setDynaTempRange}/>
+						${(endpointAPI != 2) && html`
+							<${InputBox} label="DynaTemp Exp" type="number" step="0.01"
+								readOnly=${!!cancel} value=${dynaTempExp} onValueChange=${setDynaTempExp}/>`}
+					</div>
+					<div className="hbox">
+						<${InputBox} label="Repeat penalty" type="number" step="0.01"
+							readOnly=${!!cancel} value=${repeatPenalty} onValueChange=${setRepeatPenalty}/>
+						<${InputBox} label="Repeat last n" type="number" step="1"
+							readOnly=${!!cancel} value=${repeatLastN} onValueChange=${setRepeatLastN}/>
+					</div>`}
+				${(endpointAPI == 0 || !openaiPresets ) && html`
+					${(endpointAPI != 1 && (!openaiPresets || endpointAPI != 3)) && html`
+						<${Checkbox} label="Penalize NL"
+							disabled=${!!cancel} value=${penalizeNl} onValueChange=${setPenalizeNl}/>`}
+					<div className="hbox">
+						<${InputBox} label="Presence penalty" type="number" step="0.01"
+							readOnly=${!!cancel} value=${presencePenalty} onValueChange=${setPresencePenalty}/>
+						<${InputBox} label="Frequency penalty" type="number" step="1"
+							readOnly=${!!cancel} value=${frequencyPenalty} onValueChange=${setFrequencyPenalty}/>
+					</div>`}
+				${temperature <= 0 ? null : html`
+					${(!openaiPresets || endpointAPI != 3 || endpointAPI != 4) && html`
+						<${SelectBox}
+							label="Mirostat"
+							disabled=${!!cancel}
+							value=${mirostat}
+							onValueChange=${setMirostat}
+							options=${[
+								{ name: 'Off', value: 0 },
+								{ name: 'Mirostat', value: 1 },
+								{ name: 'Mirostat 2.0', value: 2 },
+							]}/>`}
+					${(mirostat && (!openaiPresets || endpointAPI != 3 || endpointAPI != 4)) ? html`
+						<div className="hbox">
+							<${InputBox} label="Mirostat τ" type="number" step="0.01"
+								readOnly=${!!cancel} value=${mirostatTau} onValueChange=${setMirostatTau}/>
+							<${InputBox} label="Mirostat η" type="number" step="0.01"
+								readOnly=${!!cancel} value=${mirostatEta} onValueChange=${setMirostatEta}/>
+						</div>
+					` : html`
+						<div className="hbox">
+							${(!openaiPresets || endpointAPI != 3 || endpointAPI != 4) && html`
+								<${InputBox} label="Top K" type="number" step="1"
+									readOnly=${!!cancel} value=${topK} onValueChange=${setTopK}/>`}
+							<${InputBox} label="Top P" type="number" step="0.01"
+								readOnly=${!!cancel} value=${topP} onValueChange=${setTopP}/>
+							${(!openaiPresets || endpointAPI != 3) && html`
+								<${InputBox} label="Min P" type="number" step="0.01"
+									readOnly=${!!cancel} value=${minP} onValueChange=${setMinP}/>`}
+						</div>
+						${(!openaiPresets || endpointAPI != 3 || endpointAPI != 4) && html`
+							<div className="hbox">
+								<${InputBox} label="Typical p" type="number" step="0.01"
+									readOnly=${!!cancel} value=${typicalP} onValueChange=${setTypicalP}/>
+								<${InputBox} label="TFS z" type="number" step="0.01"
+									readOnly=${!!cancel} value=${tfsZ} onValueChange=${setTfsZ}/>
+							</div>`}
+					`}
+				`}
+				${(!openaiPresets || endpointAPI != 3 || endpointAPI != 4) && html`
+					<${Checkbox} label="Ignore <eos>"
+						disabled=${!!cancel} value=${ignoreEos} onValueChange=${setIgnoreEos}/>`}
+			</${CollapsibleGroup}>
+			<${CollapsibleGroup} label="Persistent Context">
+				<label className="TextArea">
+					Memory
+					<textarea
+					readOnly=${!!cancel}
+					placeholder="Anything written here will be injected at the head of the prompt. Tokens here DO count towards the Context Limit."
+					defaultValue=${memoryTokens.text}
+					value=${memoryTokens.text}
+					onInput=${(e) => handleMemoryTokensChange("text", e.target.value) }
+					id="memory-area"/>
+					<button
+					className="textAreaSettings"
+					disabled=${!!cancel}
+					onClick=${() => toggleModal("memory")}>
+					<svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="-1 -5 8 7" xmlns="http://www.w3.org/2000/svg"><path d="M0 0 3-3C3-4 3-5 5-5L4-4 5-3 6-4C6-2 5-2 4-2L1 1C0 2-1 1 0 0"></path></svg>
+					</button>
+				</label>
+				<label className="TextArea">
+					Author's Note
+					<textarea
+					readOnly=${!!cancel}
+					placeholder="Anything written here will be injected ${authorNoteDepth} newlines from bottom into context."
+					defaultValue=${authorNoteTokens.text}
+					value=${authorNoteTokens.text}
+					onInput=${(e) => handleauthorNoteTokensChange("text", e.target.value) }
+					id="an-area"/>
+					<button
+					className="textAreaSettings"
+					disabled=${!!cancel}
+					onClick=${() => toggleModal("an")}>
+					<svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="-1 -5 8 7" xmlns="http://www.w3.org/2000/svg"><path d="M0 0 3-3C3-4 3-5 5-5L4-4 5-3 6-4C6-2 5-2 4-2L1 1C0 2-1 1 0 0"></path></svg>
+					</button>
+				</label>
+				<button
+					id="viewWorldInfo"
+					disabled=${!!cancel}
+					onClick=${() => toggleModal("wi")}>
+					Show World Info
+				</button>
+				<button
+					id="viewContext"
+					disabled=${!!cancel}
+					onClick=${() => toggleModal("context")}>
+					Show Context
+				</button>
+			</${CollapsibleGroup}>
+			${!!tokens && html`
+				<${InputBox} label="Tokens" value=${tokens} readOnly/>`}
+			<div className="buttons">
+				<button
+					title="Run next prediction (Ctrl + Enter)"
+					className=${cancel ? (predictStartTokens === tokens ? 'processing' : 'completing') : ''}
+					disabled=${!!cancel || stoppingStringsError}
+					onClick=${() => predict()}>
+					Predict
+				</button>
+				<button
+					title="Cancel prediction (Escape)"
+					disabled=${!cancel}
+					onClick=${cancel}>
+					Cancel
+				</button>
+				<div className="shorts">
+				${!cancel && (!!undoStack.current.length || !!redoStack.current.length) && html`
+					<button
+						title="Regenerate (Ctrl + R)"
+						disabled=${!undoStack.current.length}
+						onClick=${() => undoAndPredict()}
+						onMouseEnter=${() => setUndoHovered(true)}
+						onMouseLeave=${() => setUndoHovered(false)}>
+						<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 40.499 40.5"><path d="M39.622,21.746l-6.749,6.75c-0.562,0.562-1.326,0.879-2.122,0.879s-1.56-0.316-2.121-0.879l-6.75-6.75		c-1.171-1.171-1.171-3.071,0-4.242c1.171-1.172,3.071-1.172,4.242,0l1.832,1.832C27.486,13.697,22.758,9.25,17,9.25		c-6.064,0-11,4.935-11,11c0,6.064,4.936,11,11,11c1.657,0,3,1.343,3,3s-1.343,3-3,3c-9.373,0-17-7.626-17-17s7.627-17,17-17		c8.936,0,16.266,6.933,16.936,15.698l1.442-1.444c1.172-1.172,3.072-1.172,4.242,0C40.792,18.674,40.792,20.574,39.622,21.746z" fill="var(--color-light)"/></svg>
+					</button>`}
+				</div>
+				<div className="shorts">
+					${!cancel && (!!undoStack.current.length || !!redoStack.current.length) && html`
+						<button
+							title="Undo (Ctrl + Z)"
+							disabled=${!undoStack.current.length}
+							onClick=${() => undo()}
+							onMouseEnter=${() => setUndoHovered(true)}
+							onMouseLeave=${() => setUndoHovered(false)}>
+							<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"><path d="M17.026 22.957c10.957-11.421-2.326-20.865-10.384-13.309l2.464 2.352h-9.106v-8.947l2.232 2.229c14.794-13.203 31.51 7.051 14.794 17.675z" fill="var(--color-light)"/></svg>
+						</button>`}
+					${!cancel && (!!undoStack.current.length || !!redoStack.current.length) && html`
+						<button
+							title="Redo (Ctrl + Y)"
+							disabled=${!redoStack.current.length}
+							onClick=${() => redo()}>
+							<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"><path d="M6.974 22.957c-10.957-11.421 2.326-20.865 10.384-13.309l-2.464 2.352h9.106v-8.947l-2.232 2.229c-14.794-13.203-31.51 7.051-14.794 17.675z" fill="var(--color-light)"/></svg>
+						</button>`}
+				</div>
+			</div>
+			${!!lastError && html`
+				<span className="error-text">${lastError}</span>`}
+		</div>
+		
+		<${Modal} isOpen=${modalState.prompt} onClose=${() => closeModal("prompt")}
+		title="Editor Preferences"
+		description=""
+		style=${{ 'width': '30%' }}>
+			<div className="vbox">
+				<${Checkbox} label="Enable spell checking"
+					value=${spellCheck} onValueChange=${setSpellCheck}/>
+				<${Checkbox} label="Attach sidebar"
+					value=${attachSidebar} onValueChange=${setAttachSidebar}/>
+				<${Checkbox} label="Highlight generated tokens"
+					value=${highlightGenTokens} onValueChange=${setHighlightGenTokens}/>
+				<${Checkbox} label="Preserve cursor position after prediction"
+					value=${preserveCursorPosition} onValueChange=${setPreserveCursorPosition}/>
+				<${SelectBox}
+					label="Token probabilities"
+					value=${showProbsMode}
+					onValueChange=${setShowProbsMode}
+					options=${[
+						{ name: 'Show on hover', value: 0 },
+						{ name: 'Show on hover while holding CTRL', value: 1 },
+						{ name: 'Don\'t show', value: -1 },
+					]}/>
+			</div>
+		</${Modal}>
+		<${Modal} isOpen=${modalState.memory} onClose=${() => closeModal("memory")}
+		title="Memory"
+		description="This text will be added at the very top of your context.
+		Prefix and suffix will be attached at the beginning or end of your memory respectively. \\n for newlines in pre/suffix.">
+			<div className="hbox">
+				<${InputBox} label="Prefix" type="text" placeholder="[INST]"
+					readOnly=${!!cancel} value=${memoryTokens.prefix} onValueChange=${(value) => handleMemoryTokensChange("prefix", value)}/>
+				<${InputBox} label="Suffix" type="text" placeholder="[/INST]"
+					readOnly=${!!cancel} value=${memoryTokens.suffix} onValueChange=${(value) => handleMemoryTokensChange("suffix", value)}/>
+			</div>
+			<textarea
+				readOnly=${!!cancel}
+				placeholder="Anything written here will be injected at the head of the prompt. Tokens here DO count towards the Context Limit."
+				defaultValue=${memoryTokens.text}
+				value=${memoryTokens.text}
+				onInput=${(e) => handleMemoryTokensChange("text", e.target.value) }
+				class="expanded-text-area-settings"
+				id="memory-area-settings"/>
+		</${Modal}>
+		<${Modal} isOpen=${modalState.an} onClose=${() => closeModal("an")}
+		title="Author's Note"
+		description="This text will be injected N newlines from the bottom of your prompt.
+		Prefix and suffix will be attached at the beginning or end of your author's note respectively. \\n for newlines in pre/suffix.">
+			<div className="hbox">
+				<${InputBox} label="Prefix" type="text" placeholder="[INST]"
+					readOnly=${!!cancel} value=${authorNoteTokens.prefix} onValueChange=${(value) => handleauthorNoteTokensChange("prefix", value)}/>
+				<${InputBox} label="Suffix" type="text" placeholder="[/INST]"
+					readOnly=${!!cancel} value=${authorNoteTokens.suffix} onValueChange=${(value) => handleauthorNoteTokensChange("suffix", value)}/>
+				<${InputBox} label="AN Injection Depth (0-N)" type="number" step="1"
+					readOnly=${!!cancel} value=${authorNoteDepth} onValueChange=${handleAuthorNoteDepthChange}/>
+			</div>
+			<textarea
+			readOnly=${!!cancel}
+			placeholder="Anything written here will be injected ${authorNoteDepth} newlines from bottom into context."
+			defaultValue=${authorNoteTokens.text}
+			value=${authorNoteTokens.text}
+			onInput=${(e) => handleauthorNoteTokensChange("text", e.target.value) }
+			class="expanded-text-area-settings"
+			id="expanded-an-settings"/>
+		</${Modal}>
+		<${Modal} isOpen=${modalState.context} onClose=${() => closeModal("context")}
+			title="Context"
+			description="This is the prompt being sent to your large language model.">
+		<${CollapsibleGroup} label="Advanced Context Ordering">
+			<div id="context-order-desc">
+				You can use the following placeholders to order the context according to your needs:<br />
+				<div id="advancedContextPlaceholders">
+					<table border="1" frame="void" rules="all">
+						<thead>
+						<tr>
+							<th></th>
+							<th>Prefix</th>
+							<th>Text</th>
+							<th>Suffix</th>
+						</tr>
+						</thead>
+						<tbody>
+						<tr>
+							<th>Memory</th>
+							<td>{memPrefix}</td>
+							<td>{memText}</td>
+							<td>{memSuffix}</td>
+						</tr>
+						<tr>
+							<th>World Info</th>
+							<td>{wiPrefix}</td>
+							<td>{wiText}</td>
+							<td>{wiSuffix}</td>
+						</tr>
+						<tr>
+							<th>Prompt</th>
+							<td></td>
+							<td>{prompt}</td>
+							<td></td>
+						</tr>
+						</tbody>
+					</table>
+				</div>
+				Any text that is not a placeholder will be added into the context as is.
+			</div>
+			<textarea
+				readOnly=${!!cancel}
+				placeholder=${defaultPresets.memoryTokens.contextOrder}
+				defaultValue=${memoryTokens.contextOrder}
+				value=${memoryTokens.contextOrder}
+				onInput=${(e) => handleMemoryTokensChange("contextOrder", e.target.value)}
+				class="expanded-text-area-settings"
+				id="advanced-context-order-settings"/>
+		</${CollapsibleGroup}>
+			<textarea
+			readOnly=${!!cancel}
+			value=${modifiedPrompt}
+			class="expanded-text-area-settings"
+			id="context-area-settings" readOnly/>
+		</${Modal}>
+		<${Modal} isOpen=${modalState.wi} onClose=${() => closeModal("wi")}
+			title="World Info"
+			description="Additional information that is added when specific keywords are found in context.
+			World info will be added at the top of your memory, in the order specified here.
+			Each entry will begin on a newline. Keys will be interpreted as case-insensitive regular expressions. Search Range specifies how many tokens back into the context will be searched for activation keys. Search range 0 to disable an entry.">
+			<div id="modal-wi-global">
+				<${CollapsibleGroup} label="Prefix/Suffix">
+					The prefix and suffix will be added at the beginning or end of all your active World Info entries respectively.
+					<br />
+					<div className="hbox">
+						<${InputBox} label="Prefix" type="text" placeholder="\\n"
+							readOnly=${!!cancel} value=${worldInfo.prefix} onValueChange=${(value) => handleWorldInfoAffixChange("prefix", value)}/>
+						<${InputBox} label="Suffix" type="text" placeholder="\\n"
+							readOnly=${!!cancel} value=${worldInfo.suffix} onValueChange=${(value) => handleWorldInfoAffixChange("suffix", value)}/>
+					</div>
+				</${CollapsibleGroup}>
+				<button id="button-wi-new" disabled=${!!cancel} onClick=${handleWorldInfoNew}>New Entry</button>
+			</div>
+			<div className="modal-wi-content">
+				${ !Array.isArray(worldInfo.entries) ? null : worldInfo.entries.map((entry, index) => html`
+				<div class="wi-entry" key=${index}>
+					<div class="wi-entry-controls">
+						<div class="wi-entry-filler" />
+						<div class="wi-entry-name">
+							<${InputBox}
+							label="Entry #${index+1}"
+							type="text"
+							readOnly=${!!cancel}
+							placeholder="Name of this entry"
+							value=${entry.displayName}
+							onValueChange=${(value) => handleWorldInfoChange("displayName",index,value)}
+							/>
+						</div>
+						<div class="wi-entry-buttons">
+							<div class="wi-entry-buttons-container">
+								<button disabled=${!!cancel} onClick=${() => handleWorldInfoMove(index,-1)}>
+									<svg fill="var(--color-light)" height="12" width="12" viewBox="0 0 330 330"><path d="M325.606,229.393l-150.004-150C172.79,76.58,168.974,75,164.996,75c-3.979,0-7.794,1.581-10.607,4.394 l-149.996,150c-5.858,5.858-5.858,15.355,0,21.213c5.857,5.857,15.355,5.858,21.213,0l139.39-139.393l139.397,139.393 C307.322,253.536,311.161,255,315,255c3.839,0,7.678-1.464,10.607-4.394C331.464,244.748,331.464,235.251,325.606,229.393z"/></svg>
+								</button>
+								<button disabled=${!!cancel} onClick=${() => handleWorldInfoDel(index)}>
+									✕
+								</button>
+								<button disabled=${!!cancel} onClick=${() => handleWorldInfoMove(index,1)}>
+									<svg fill="var(--color-light)" height="12" width="12" viewBox="0 0 330 330"><path d="M325.607,79.393c-5.857-5.857-15.355-5.858-21.213,0.001l-139.39,139.393L25.607,79.393 c-5.857-5.857-15.355-5.858-21.213,0.001c-5.858,5.858-5.858,15.355,0,21.213l150.004,150c2.813,2.813,6.628,4.393,10.606,4.393 s7.794-1.581,10.606-4.394l149.996-150C331.465,94.749,331.465,85.251,325.607,79.393z"/></svg>
+								</button>
+							</div>
+						</div>
+						<div class="wi-entry-text">
+							<div class="hbox">
+								<${InputBox}
+									label="Comma Separated RegEx Keys"
+									type="text"
+									readOnly=${!!cancel}
+									value=${entry.keys.join(',')}
+									placeholder="Required to activate entry"
+									onValueChange=${(value) => handleWorldInfoChange("keys",index,value)}
+									/>
+								<${InputBox}
+									label="Search Range (0 = disabled)"
+									tooltip="Currently not accurate to the token count, it will be used as an estimate."
+									type="text"
+									readOnly=${!!cancel}
+									inputmode="numeric"
+									value=${entry.search}
+									placeholder="2048"
+									onValueChange=${(value) => handleWorldInfoChange("search",index,value)}
+									/>
+							</div>
+							<label class="TextArea">
+								Text
+								<textarea
+									readOnly=${!!cancel}
+									placeholder="Information to be inserted into context when key is found"
+									value=${entry.text ? entry.text : ""}
+									defaultValue=${entry.text ? entry.text : ""}
+									onInput=${(e) => handleWorldInfoChange("text",index, e.target.value)}
+									class="wi-textarea" />
+							</label>
+							</div>
+						</div>
+					</div>
+				`)}
+			</div>
+		</${Modal}>
+	`;
+}
+
+async function main() {
+	const sessionStorage = new SessionStorage(defaultPresets);
+	await sessionStorage.init();
+
+	createRoot(document.body).render(html`
+		<${App}
+			sessionStorage=${sessionStorage}
+			useSessionState=${(name, initialState) => useSessionState(sessionStorage, name, initialState)}/>`);
+}
+
+main();

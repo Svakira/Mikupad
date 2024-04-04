@@ -1,4 +1,8 @@
-
+:root {
+	--custom-bg-image: url('/img/6505671-raven_in_comic_book.jpg');
+  }
+  
+  
 html {
 	--color-miku: #009bb3;
 	--color-base-0: oklch(0.20 0.02 60);
@@ -113,36 +117,34 @@ html.monospace-dark {
 }
 
 html.infermatic {
-	---color-bg-dark: #282833;
-	--color-bg: #202020;
-	--color-text: #bababa;
-	--color-base-0: oklch(77.65% 0.0752 285.22);
-	--color-base-10: color-mix(in oklch, var(--color-base-100) 90%, var(--color-base-0));
-	--color-base-20: color-mix(in oklch, var(--color-base-100) 80%, var(--color-base-0));
-	--color-base-30: color-mix(in oklch, var(--color-base-100) 70%, var(--color-base-0));
-	--color-base-40: color-mix(in oklch, var(--color-base-100) 60%, var(--color-base-0));
+	--color-miku: #009bb3;
+	--color-base-0: oklch(0.20 0.02 60);
+	--color-base-10: color-mix(in oklch, var(--color-base-100) 10%, var(--color-base-0));
+	--color-base-20: color-mix(in oklch, var(--color-base-100) 20%, var(--color-base-0));
+	--color-base-30: color-mix(in oklch, var(--color-base-100) 30%, var(--color-base-0));
+	--color-base-40: color-mix(in oklch, var(--color-base-100) 40%, var(--color-base-0));
 	--color-base-50: color-mix(in oklch, var(--color-base-100) 50%, var(--color-base-0));
-	--color-base-60: color-mix(in oklch, var(--color-base-100) 40%, var(--color-base-0));
-	--color-base-70: color-mix(in oklch, var(--color-base-100) 30%, var(--color-base-0));
-	--color-base-80: color-mix(in oklch, var(--color-base-100) 20%, var(--color-base-0));
-	--color-base-90: color-mix(in oklch, var(--color-base-100) 10%, var(--color-base-0));
-	--color-base-100: oklch(24.28% 0.015 285.22);
-	--color-dark: var(--color-base-100);
-	--color-light: var(--color-base-0);
-	--token-prob-box: #4a4a4a;
+	--color-base-60: color-mix(in oklch, var(--color-base-100) 60%, var(--color-base-0));
+	--color-base-70: color-mix(in oklch, var(--color-base-100) 70%, var(--color-base-0));
+	--color-base-80: color-mix(in oklch, var(--color-base-100) 80%, var(--color-base-0));
+	--color-base-90: color-mix(in oklch, var(--color-base-100) 90%, var(--color-base-0));
+	--color-base-100: oklch(0.95 0.04 70);
+	--color-dark: var(--color-base-0);
+	--color-light: var(--color-base-100);
 
-	font-family: monospace;
-	font-size: 15px;
+	font-family: serif;
+	font-size: 16px;
+	min-height: 100%;
+	display: flex;
+	flex-direction: column;
 
 	accent-color: var(--color-base-30);
-	background: var(--color-bg-dark);
-	background-color: var(--color-bg-dark); /* Preserve the background color */
-    /*background-image: var(--custom-bg-image, url('path/to/default/background-image.jpg')); /* Use custom property */
-    background-size: cover; /* Cover the entire page */
-    background-position: center; /* Center the background image */
-    background-repeat: no-repeat;
+	--custom-bg-image: url('/img/6505671-raven_in_comic_book.jpg');
+  background-image: var(--custom-bg-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 	color: var(--color-base-0);
-	color-scheme: dark;
 }
 
 body {
@@ -192,7 +194,9 @@ body {
 	-moz-text-size-adjust: 100%;
 	/*white-space: break-spaces;*/
 	word-wrap: break-word;
+	
 }
+
 html.monospace-dark #prompt-area,
 html.monospace-dark #memory-area,
 html.monospace-dark #an-area,
