@@ -1165,6 +1165,7 @@ function usePersistentState(name, initialState) {
 
 	return html`
 	
+	
 	<div id="sidebar2" >
 			
 			<${SelectBox}
@@ -1675,21 +1676,17 @@ function usePersistentState(name, initialState) {
 	`;
 }
 
+
+
 async function main() {
-	const sessionStorage = new SessionStorage(defaultPresets);
-	await sessionStorage.init();
+    const sessionStorage = new SessionStorage(defaultPresets);
+    await sessionStorage.init();
 
-	createRoot(document.body).render(html`
-		<${App}
-			sessionStorage=${sessionStorage}
-			useSessionState=${(name, initialState) => useSessionState(sessionStorage, name, initialState)}/>`);
-}
-
-main();
-
-
-});
-
+    createRoot(document.body).render(html`
+        <${App}
+            sessionStorage=${sessionStorage}
+            useSessionState=${(name, initialState) => useSessionState(sessionStorage, name, initialState)}/>`);
+};
 
 
 export async function getTokenCount({ endpoint, endpointAPI, endpointAPIKey, signal, ...options }) {
