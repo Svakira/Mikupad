@@ -137,7 +137,7 @@ html.infermatic {
 	accent-color: var(--color-base-30);
 	background: var(--color-bg-dark);
 	background-color: var(--color-bg-dark); /* Preserve the background color */
-    background-image: var(--custom-bg-image, url('path/to/default/background-image.jpg')); /* Use custom property */
+    /*background-image: var(--custom-bg-image, url('path/to/default/background-image.jpg')); /* Use custom property */
     background-size: cover; /* Cover the entire page */
     background-position: center; /* Center the background image */
     background-repeat: no-repeat;
