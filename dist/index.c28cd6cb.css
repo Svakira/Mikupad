@@ -1,7 +1,3 @@
-:root {
-  --custom-bg-image: url("6505671-raven_in_comic_book.b68e43ae.jpg");
-}
-
 html {
   --color-miku: #009bb3;
   --color-base-0: oklch(.2 .02 60);
@@ -114,8 +110,8 @@ html.monospace-dark {
 }
 
 html.infermatic {
-  --color-miku: #009bb3;
-  --color-base-0: oklch(.2 .02 60);
+  ---color-bg-dark: #191b31;
+  --color-bg: #191b31;
   --color-base-10: color-mix(in oklch, var(--color-base-100) 10%, var(--color-base-0));
   --color-base-20: color-mix(in oklch, var(--color-base-100) 20%, var(--color-base-0));
   --color-base-30: color-mix(in oklch, var(--color-base-100) 30%, var(--color-base-0));
@@ -129,9 +125,8 @@ html.infermatic {
   --color-dark: var(--color-base-0);
   --color-light: var(--color-base-100);
   accent-color: var(--color-base-30);
-  --custom-bg-image: url("6505671-raven_in_comic_book.b68e43ae.jpg");
-  background-image: var(--custom-bg-image);
   color: var(--color-base-0);
+  background-color: #1b1c31;
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
@@ -189,6 +184,19 @@ body {
   flex: 1;
   margin: 0;
   padding: 2em 3em;
+}
+
+html.infermatic #prompt-area, html.infermatic #memory-area, html.infermatic #an-area, html.infermatic .expanded-text-area-settings {
+  color: var(--color-base-90);
+  background: #24243d3b;
+}
+
+html.infermatic #session-title {
+  color: #fff;
+}
+
+html.infermatic #sidebar, html.infermatic #sidebar2 {
+  background-color: #16182e;
 }
 
 html.monospace-dark #prompt-area, html.monospace-dark #memory-area, html.monospace-dark #an-area, html.monospace-dark .expanded-text-area-settings, html.monospace-dark .wi-textarea {
@@ -311,9 +319,9 @@ html.nockoffAI #memory-area, html.nockoffAI #an-area, html.nockoffAI .expanded-t
 }
 
 html.monospace-dark #probs, html.nockoffAI #probs {
-  background: var(--color-base-10);
   border: 1px solid var(--token-prob-box);
   box-shadow: none;
+  background: #242437;
   border-radius: 4px;
 }
 
@@ -539,7 +547,7 @@ html.monospace-dark #sidebar {
   background: #282833;
 }
 
-html.nockoffAI #sidebar {
+html.nockoffAI #sidebar, html.nockoffAI #sidebar2 {
   background: var(--color-sidebar);
   color: var(--color-base-50);
 }
@@ -581,6 +589,26 @@ html.nockoffAI #sidebar {
   margin: 0 -8px;
   padding: 4px 8px;
   font-size: 1rem;
+}
+
+html.infermatic .InputBox > input, html.infermatic .SelectBox > select, html.infermatic .TextArea > textarea {
+  appearance: none;
+  box-sizing: content-box;
+  font: inherit;
+  color: #fff;
+  background: #1c1c35;
+  border: none;
+  border-radius: 2px;
+  outline: none;
+  flex: none;
+  width: 100%;
+  margin: 0 -8px;
+  padding: 4px 8px;
+  font-size: 1rem;
+}
+
+html.infermatic .collapsible-header {
+  background: #15152d;
 }
 
 html.monospace-dark .InputBox > input, html.monospace-dark .SelectBox > select, html.nockoffAI .InputBox > input, html.nockoffAI .SelectBox > select {
@@ -698,6 +726,11 @@ button {
 html.nockoffAI button {
   background: var(--color-button);
   color: var(--color-base-90);
+}
+
+html.infermatic button {
+  color: #fff;
+  background: #25253b;
 }
 
 html.nockoffAI .Session button:not(:hover), html.nockoffAI button.textAreaSettings:not(:hover) {
@@ -833,6 +866,11 @@ button.completing {
   overflow-y: auto;
 }
 
+html.infermatic .Sessions > ul {
+  color: #fff;
+  background: #191b32;
+}
+
 html.monospace-dark .Sessions > ul {
   background: var(--color-base-20);
 }
@@ -905,6 +943,10 @@ html.monospace-dark .Session.selected {
   background-color: var(--color-base-10);
 }
 
+html.infermatic .Session.selected {
+  background-color: #4c4c59;
+}
+
 .Session > button {
   cursor: pointer;
   opacity: .5;
@@ -946,5 +988,10 @@ html.monospace-dark .horz-separator {
 
 .image-upload-container {
   margin-top: 20px;
+}
+
+.infermatic_logo {
+  margin-top: 5%;
+  margin-bottom: 5%;
 }
 /*# sourceMappingURL=index.c28cd6cb.css.map */

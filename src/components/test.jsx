@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { html } from 'htm/react';
 import { SVResizeObserver } from 'scrollview-resize';
+import infermaticLogo from '../../img/infermatic_logo.png';
 
 // Polyfill for piece of shit Chromium
 if (!(Symbol.asyncIterator in ReadableStream.prototype)) {
@@ -571,6 +572,7 @@ function CollapsibleGroup({ label, expanded, children }) {
 		setContentHeight(contentArea.current.scrollHeight);
 	}, [isCollapsed]);
 
+
 	const expandSvg = html`<svg fill="var(--color-light)" height="12" width="12" viewBox="0 0 330 330"><path d="M325.607,79.393c-5.857-5.857-15.355-5.858-21.213,0.001l-139.39,139.393L25.607,79.393 c-5.857-5.857-15.355-5.858-21.213,0.001c-5.858,5.858-5.858,15.355,0,21.213l150.004,150c2.813,2.813,6.628,4.393,10.606,4.393 s7.794-1.581,10.606-4.394l149.996-150C331.465,94.749,331.465,85.251,325.607,79.393z"/></svg>`;
 	const collapseSvg = html`<svg fill="var(--color-light)" height="12" width="12" viewBox="0 0 330 330"><path d="M325.606,229.393l-150.004-150C172.79,76.58,168.974,75,164.996,75c-3.979,0-7.794,1.581-10.607,4.394 l-149.996,150c-5.858,5.858-5.858,15.355,0,21.213c5.857,5.857,15.355,5.858,21.213,0l139.39-139.393l139.397,139.393 C307.322,253.536,311.161,255,315,255c3.839,0,7.678-1.464,10.607-4.394C331.464,244.748,331.464,235.251,325.606,229.393z"/></svg>`;
 
@@ -772,6 +774,7 @@ function Sessions({ sessionStorage, onSessionChange, disabled }) {
 	const cancelSvg = html`<svg width="16" height="16" viewBox="0 0 128 128"><circle cx="64" cy="64" r="64" fill="var(--color-dark)"/><path d="M100.3 90.4 73.9 64l26.3-26.4c.4-.4.4-1 0-1.4l-8.5-8.5c-.4-.4-1-.4-1.4 0L64 54.1 37.7 27.8c-.4-.4-1-.4-1.4 0l-8.5 8.5c-.4.4-.4 1 0 1.4L54 64 27.7 90.3c-.4.4-.4 1 0 1.4l8.5 8.5c.4.4 1.1.4 1.4 0L64 73.9l26.3 26.3c.4.4 1.1.4 1.5.1l8.5-8.5c.4-.4.4-1 0-1.4z" fill="var(--color-light)"/></svg>`;
 
 	return html`
+	<p>Your stories</p>
 		<div className="Sessions ${disabled ? 'disabled' : ''}">
 			<ul>
 				${isCreating && html`
@@ -1606,6 +1609,7 @@ export function App({ sessionStorage, useSessionState }) {
 			document.body.classList.remove('attachSidebar');
 	}, [attachSidebar]);
 
+	  
 	useLayoutEffect(() => {
 		document.documentElement.classList.remove('serif-dark');
 		document.documentElement.classList.remove('monospace-dark');
@@ -1993,7 +1997,7 @@ export function App({ sessionStorage, useSessionState }) {
 	return html`
 	
 	<div id="sidebar2" >
-			
+			<img class='infermatic_logo' src=${infermaticLogo} alt="infermatic logo"/>
 			<${SelectBox}
 				label="Theme"
 				value=${theme}
@@ -2010,29 +2014,78 @@ export function App({ sessionStorage, useSessionState }) {
 				<${Sessions} sessionStorage=${sessionStorage}
 					disabled=${!!cancel}
 					onSessionChange=${onSessionChange}/>
-                    <div>
-                    <input type="file" accept="image/*" onchange=${(e) => updateBackgroundImage(e.target)} />
-                </div>
+        
 			</container>
+			<${CollapsibleGroup} label="Persistent Context">
+				<label className="TextArea">
+					Memory
+					<textarea
+					readOnly=${!!cancel}
+					placeholder="Anything written here will be injected at the head of the prompt. Tokens here DO count towards the Context Limit."
+					defaultValue=${memoryTokens.text}
+					value=${memoryTokens.text}
+					onInput=${(e) => handleMemoryTokensChange("text", e.target.value) }
+					id="memory-area"/>
+					<button
+					className="textAreaSettings"
+					disabled=${!!cancel}
+					onClick=${() => toggleModal("memory")}>
+					<svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="-1 -5 8 7" xmlns="http://www.w3.org/2000/svg"><path d="M0 0 3-3C3-4 3-5 5-5L4-4 5-3 6-4C6-2 5-2 4-2L1 1C0 2-1 1 0 0"></path></svg>
+					</button>
+				</label>
+				<label className="TextArea">
+					Author's Note
+					<textarea
+					readOnly=${!!cancel}
+					placeholder="Anything written here will be injected ${authorNoteDepth} newlines from bottom into context."
+					defaultValue=${authorNoteTokens.text}
+					value=${authorNoteTokens.text}
+					onInput=${(e) => handleauthorNoteTokensChange("text", e.target.value) }
+					id="an-area"/>
+					<button
+					className="textAreaSettings"
+					disabled=${!!cancel}
+					onClick=${() => toggleModal("an")}>
+					<svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="-1 -5 8 7" xmlns="http://www.w3.org/2000/svg"><path d="M0 0 3-3C3-4 3-5 5-5L4-4 5-3 6-4C6-2 5-2 4-2L1 1C0 2-1 1 0 0"></path></svg>
+					</button>
+				</label>
+				<button
+					id="viewWorldInfo"
+					disabled=${!!cancel}
+					onClick=${() => toggleModal("wi")}>
+					Show World Info
+				</button>
+				<button
+					id="viewContext"
+					disabled=${!!cancel}
+					onClick=${() => toggleModal("context")}>
+					Show Context
+				</button>
+			</${CollapsibleGroup}>
 			${!!tokens && html`
 				<${InputBox} label="Tokens" value=${tokens} readOnly/>`}
-			
-			${!!lastError && html`
-				<span className="error-text">${lastError}</span>`}
+		
 		</div>
+		
 		<div id="prompt-container" onMouseMove=${onPromptMouseMove}>
+		<div id="title-bar">
+			<h2 id="session-title">${sessionStorage.sessions[sessionStorage.selectedSession]?.name || 'New Story'}</h2>
+		</div>
 			<button
+			
 				className="textAreaSettings"
 				onClick=${() => toggleModal("prompt")}>
 				<svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="-1 -5 8 7" xmlns="http://www.w3.org/2000/svg"><path d="M0 0 3-3C3-4 3-5 5-5L4-4 5-3 6-4C6-2 5-2 4-2L1 1C0 2-1 1 0 0"></path></svg>
 			</button>
 			<textarea
+				useSessionState=${(name)}
 				ref=${promptArea}
 				readOnly=${!!cancel}
 				spellCheck=${spellCheck}
 				id="prompt-area"
 				onInput=${onInput}
 				onScroll=${onScroll}/>
+				
 			<div ref=${promptOverlay} id="prompt-overlay" aria-hidden>
 				${highlightGenTokens || showProbsMode !== -1 ? html`
 					${promptChunks.map((chunk, i) => {
@@ -2046,8 +2099,10 @@ export function App({ sessionStorage, useSessionState }) {
 								${(chunk.content === '\n' ? ' \n' : chunk.content) + (i === promptChunks.length - 1 && chunk.content.endsWith('\n') ? '\u00a0' : '')}
 							</span>`;
 					})}` : null}
+					
 			</div>
 		
+
 		</div>
 		
 		
@@ -2185,52 +2240,7 @@ export function App({ sessionStorage, useSessionState }) {
 					<${Checkbox} label="Ignore <eos>"
 						disabled=${!!cancel} value=${ignoreEos} onValueChange=${setIgnoreEos}/>`}
 			</${CollapsibleGroup}>
-			<${CollapsibleGroup} label="Persistent Context">
-				<label className="TextArea">
-					Memory
-					<textarea
-					readOnly=${!!cancel}
-					placeholder="Anything written here will be injected at the head of the prompt. Tokens here DO count towards the Context Limit."
-					defaultValue=${memoryTokens.text}
-					value=${memoryTokens.text}
-					onInput=${(e) => handleMemoryTokensChange("text", e.target.value) }
-					id="memory-area"/>
-					<button
-					className="textAreaSettings"
-					disabled=${!!cancel}
-					onClick=${() => toggleModal("memory")}>
-					<svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="-1 -5 8 7" xmlns="http://www.w3.org/2000/svg"><path d="M0 0 3-3C3-4 3-5 5-5L4-4 5-3 6-4C6-2 5-2 4-2L1 1C0 2-1 1 0 0"></path></svg>
-					</button>
-				</label>
-				<label className="TextArea">
-					Author's Note
-					<textarea
-					readOnly=${!!cancel}
-					placeholder="Anything written here will be injected ${authorNoteDepth} newlines from bottom into context."
-					defaultValue=${authorNoteTokens.text}
-					value=${authorNoteTokens.text}
-					onInput=${(e) => handleauthorNoteTokensChange("text", e.target.value) }
-					id="an-area"/>
-					<button
-					className="textAreaSettings"
-					disabled=${!!cancel}
-					onClick=${() => toggleModal("an")}>
-					<svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="-1 -5 8 7" xmlns="http://www.w3.org/2000/svg"><path d="M0 0 3-3C3-4 3-5 5-5L4-4 5-3 6-4C6-2 5-2 4-2L1 1C0 2-1 1 0 0"></path></svg>
-					</button>
-				</label>
-				<button
-					id="viewWorldInfo"
-					disabled=${!!cancel}
-					onClick=${() => toggleModal("wi")}>
-					Show World Info
-				</button>
-				<button
-					id="viewContext"
-					disabled=${!!cancel}
-					onClick=${() => toggleModal("context")}>
-					Show Context
-				</button>
-			</${CollapsibleGroup}>
+			
 			${!!tokens && html`
 				<${InputBox} label="Tokens" value=${tokens} readOnly/>`}
 			<div className="buttons">

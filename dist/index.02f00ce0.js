@@ -2962,6 +2962,8 @@ var _react = require("react");
 var _client = require("react-dom/client");
 var _react1 = require("htm/react");
 var _scrollviewResize = require("scrollview-resize");
+var _infermaticLogoPng = require("../../img/infermatic_logo.png");
+var _infermaticLogoPngDefault = parcelHelpers.interopDefault(_infermaticLogoPng);
 var _s = $RefreshSig$(), _s1 = $RefreshSig$(), _s2 = $RefreshSig$(), _s3 = $RefreshSig$(), _s4 = $RefreshSig$(), _s5 = $RefreshSig$();
 // Polyfill for piece of shit Chromium
 if (!(Symbol.asyncIterator in ReadableStream.prototype)) ReadableStream.prototype[Symbol.asyncIterator] = async function*() {
@@ -3089,8 +3091,8 @@ async function* parseEventStream(eventStream) {
                     data = undefined;
                     continue;
                 }
-                const { name, value } = /^(?<name>.*?)(?:: ?(?<value>.*))?$/s.exec(line).groups;
-                switch(name){
+                const { name: name1, value } = /^(?<name>.*?)(?:: ?(?<value>.*))?$/s.exec(line).groups;
+                switch(name1){
                     case "event":
                         type = value ?? "";
                         break;
@@ -3605,8 +3607,8 @@ function Sessions({ sessionStorage, onSessionChange, disabled }) {
     const switchSession = async (sessionId)=>{
         if (sessionStorage.selectedSession != sessionId) await sessionStorage.switchSession(sessionId);
     };
-    const startRenameSession = (sessionId, name)=>{
-        setRenameSessionName(name);
+    const startRenameSession = (sessionId, name1)=>{
+        setRenameSessionName(name1);
         setRenamingId(sessionId);
     };
     const renameSession = async (sessionId)=>{
@@ -3683,7 +3685,7 @@ function Sessions({ sessionStorage, onSessionChange, disabled }) {
             else if (renamingId !== undefined) setRenamingId(undefined);
         }
     }
-    function updateBackgroundImage1(input) {
+    function updateBackgroundImage(input) {
         if (input.files && input.files[0]) {
             var reader = new FileReader();
             reader.onload = function(e) {
@@ -3724,6 +3726,7 @@ function Sessions({ sessionStorage, onSessionChange, disabled }) {
     const confirmSvg = (0, _react1.html)`<svg width="16" height="16" viewBox="0 0 128 128"><circle cx="64" cy="64" r="64" fill="var(--color-dark)"/><path d="M54.3 97.2 24.8 67.7c-.4-.4-.4-1 0-1.4l8.5-8.5c.4-.4 1-.4 1.4 0L55 78.1l38.2-38.2c.4-.4 1-.4 1.4 0l8.5 8.5c.4.4.4 1 0 1.4L55.7 97.2c-.4.4-1 .4-1.4 0z" fill="var(--color-light)"/></svg>`;
     const cancelSvg = (0, _react1.html)`<svg width="16" height="16" viewBox="0 0 128 128"><circle cx="64" cy="64" r="64" fill="var(--color-dark)"/><path d="M100.3 90.4 73.9 64l26.3-26.4c.4-.4.4-1 0-1.4l-8.5-8.5c-.4-.4-1-.4-1.4 0L64 54.1 37.7 27.8c-.4-.4-1-.4-1.4 0l-8.5 8.5c-.4.4-.4 1 0 1.4L54 64 27.7 90.3c-.4.4-.4 1 0 1.4l8.5 8.5c.4.4 1.1.4 1.4 0L64 73.9l26.3 26.3c.4.4 1.1.4 1.5.1l8.5-8.5c.4-.4.4-1 0-1.4z" fill="var(--color-light)"/></svg>`;
     return (0, _react1.html)`
+	<p>Your stories</p>
 		<div className="Sessions ${disabled ? "disabled" : ""}">
 			<ul>
 				${isCreating && (0, _react1.html)`
@@ -3830,13 +3833,13 @@ class SessionStorage {
         await this.saveToDatabase("nextSessionId", this.nextId);
         return this.nextId - 1;
     }
-    addDependent(name, callback) {
-        this.dependents[name] = this.dependents[name] || new Set();
-        this.dependents[name].add(callback);
+    addDependent(name1, callback) {
+        this.dependents[name1] = this.dependents[name1] || new Set();
+        this.dependents[name1].add(callback);
     }
-    updateDependents(name, newValue) {
-        if (!this.dependents[name]) return;
-        for (const callback of this.dependents[name])callback(newValue);
+    updateDependents(name1, newValue) {
+        if (!this.dependents[name1]) return;
+        for (const callback of this.dependents[name1])callback(newValue);
     }
     async saveTimerHandler() {
         while(this.saveQueue.length){
@@ -4052,22 +4055,22 @@ function replaceUnprintableBytes(inputString) {
     });
     return replacedString;
 }
-function useSessionState(sessionStorage, name, initialState) {
+function useSessionState(sessionStorage, name1, initialState) {
     _s3();
     const savedState = (0, _react.useMemo)(()=>{
         try {
-            return sessionStorage.getProperty(name);
+            return sessionStorage.getProperty(name1);
         } catch (e) {
             reportError(e);
             return null;
         }
     }, []);
     const [value, setValue] = (0, _react.useState)(savedState ?? initialState);
-    sessionStorage.addDependent(name, setValue);
+    sessionStorage.addDependent(name1, setValue);
     const updateState = (newValue)=>{
         setValue((prevValue)=>{
             const updatedValue = typeof newValue === "function" ? newValue(prevValue) : newValue;
-            sessionStorage.setProperty(name, updatedValue);
+            sessionStorage.setProperty(name1, updatedValue);
             return updatedValue;
         });
     };
@@ -4077,11 +4080,11 @@ function useSessionState(sessionStorage, name, initialState) {
     ];
 }
 _s3(useSessionState, "LO3OsQIY1Ah2ogd8qXgRQ8HT5Dk=");
-function usePersistentState(name, initialState) {
+function usePersistentState(name1, initialState) {
     _s4();
     const savedState = (0, _react.useMemo)(()=>{
         try {
-            return JSON.parse(localStorage.getItem(name));
+            return JSON.parse(localStorage.getItem(name1));
         } catch (e) {
             reportError(e);
             return null;
@@ -4091,7 +4094,7 @@ function usePersistentState(name, initialState) {
     const updateState = (newValue)=>{
         setValue((prevValue)=>{
             const updatedValue = typeof newValue === "function" ? newValue(prevValue) : newValue;
-            localStorage.setItem(name, JSON.stringify(updatedValue));
+            localStorage.setItem(name1, JSON.stringify(updatedValue));
             return updatedValue;
         });
     };
@@ -4843,7 +4846,7 @@ function App({ sessionStorage, useSessionState }) {
     return (0, _react1.html)`
 	
 	<div id="sidebar2" >
-			
+			<img class='infermatic_logo' src=${0, _infermaticLogoPngDefault.default} alt="infermatic logo"/>
 			<${SelectBox}
 				label="Theme"
 				value=${theme}
@@ -4875,29 +4878,78 @@ function App({ sessionStorage, useSessionState }) {
 				<${Sessions} sessionStorage=${sessionStorage}
 					disabled=${!!cancel}
 					onSessionChange=${onSessionChange}/>
-                    <div>
-                    <input type="file" accept="image/*" onchange=${(e)=>updateBackgroundImage(e.target)} />
-                </div>
+        
 			</container>
+			<${CollapsibleGroup} label="Persistent Context">
+				<label className="TextArea">
+					Memory
+					<textarea
+					readOnly=${!!cancel}
+					placeholder="Anything written here will be injected at the head of the prompt. Tokens here DO count towards the Context Limit."
+					defaultValue=${memoryTokens.text}
+					value=${memoryTokens.text}
+					onInput=${(e)=>handleMemoryTokensChange("text", e.target.value)}
+					id="memory-area"/>
+					<button
+					className="textAreaSettings"
+					disabled=${!!cancel}
+					onClick=${()=>toggleModal("memory")}>
+					<svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="-1 -5 8 7" xmlns="http://www.w3.org/2000/svg"><path d="M0 0 3-3C3-4 3-5 5-5L4-4 5-3 6-4C6-2 5-2 4-2L1 1C0 2-1 1 0 0"></path></svg>
+					</button>
+				</label>
+				<label className="TextArea">
+					Author's Note
+					<textarea
+					readOnly=${!!cancel}
+					placeholder="Anything written here will be injected ${authorNoteDepth} newlines from bottom into context."
+					defaultValue=${authorNoteTokens.text}
+					value=${authorNoteTokens.text}
+					onInput=${(e)=>handleauthorNoteTokensChange("text", e.target.value)}
+					id="an-area"/>
+					<button
+					className="textAreaSettings"
+					disabled=${!!cancel}
+					onClick=${()=>toggleModal("an")}>
+					<svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="-1 -5 8 7" xmlns="http://www.w3.org/2000/svg"><path d="M0 0 3-3C3-4 3-5 5-5L4-4 5-3 6-4C6-2 5-2 4-2L1 1C0 2-1 1 0 0"></path></svg>
+					</button>
+				</label>
+				<button
+					id="viewWorldInfo"
+					disabled=${!!cancel}
+					onClick=${()=>toggleModal("wi")}>
+					Show World Info
+				</button>
+				<button
+					id="viewContext"
+					disabled=${!!cancel}
+					onClick=${()=>toggleModal("context")}>
+					Show Context
+				</button>
+			</${CollapsibleGroup}>
 			${!!tokens && (0, _react1.html)`
 				<${InputBox} label="Tokens" value=${tokens} readOnly/>`}
-			
-			${!!lastError && (0, _react1.html)`
-				<span className="error-text">${lastError}</span>`}
+		
 		</div>
+		
 		<div id="prompt-container" onMouseMove=${onPromptMouseMove}>
+		<div id="title-bar">
+			<h2 id="session-title">${sessionStorage.sessions[sessionStorage.selectedSession]?.name || "New Story"}</h2>
+		</div>
 			<button
+			
 				className="textAreaSettings"
 				onClick=${()=>toggleModal("prompt")}>
 				<svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="-1 -5 8 7" xmlns="http://www.w3.org/2000/svg"><path d="M0 0 3-3C3-4 3-5 5-5L4-4 5-3 6-4C6-2 5-2 4-2L1 1C0 2-1 1 0 0"></path></svg>
 			</button>
 			<textarea
+				useSessionState=${name}
 				ref=${promptArea}
 				readOnly=${!!cancel}
 				spellCheck=${spellCheck}
 				id="prompt-area"
 				onInput=${onInput}
 				onScroll=${onScroll}/>
+				
 			<div ref=${promptOverlay} id="prompt-overlay" aria-hidden>
 				${highlightGenTokens || showProbsMode !== -1 ? (0, _react1.html)`
 					${promptChunks.map((chunk, i)=>{
@@ -4911,8 +4963,10 @@ function App({ sessionStorage, useSessionState }) {
 								${(chunk.content === "\n" ? " \n" : chunk.content) + (i === promptChunks.length - 1 && chunk.content.endsWith("\n") ? "\xa0" : "")}
 							</span>`;
     })}` : null}
+					
 			</div>
 		
+
 		</div>
 		
 		
@@ -5069,52 +5123,7 @@ function App({ sessionStorage, useSessionState }) {
 					<${Checkbox} label="Ignore <eos>"
 						disabled=${!!cancel} value=${ignoreEos} onValueChange=${setIgnoreEos}/>`}
 			</${CollapsibleGroup}>
-			<${CollapsibleGroup} label="Persistent Context">
-				<label className="TextArea">
-					Memory
-					<textarea
-					readOnly=${!!cancel}
-					placeholder="Anything written here will be injected at the head of the prompt. Tokens here DO count towards the Context Limit."
-					defaultValue=${memoryTokens.text}
-					value=${memoryTokens.text}
-					onInput=${(e)=>handleMemoryTokensChange("text", e.target.value)}
-					id="memory-area"/>
-					<button
-					className="textAreaSettings"
-					disabled=${!!cancel}
-					onClick=${()=>toggleModal("memory")}>
-					<svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="-1 -5 8 7" xmlns="http://www.w3.org/2000/svg"><path d="M0 0 3-3C3-4 3-5 5-5L4-4 5-3 6-4C6-2 5-2 4-2L1 1C0 2-1 1 0 0"></path></svg>
-					</button>
-				</label>
-				<label className="TextArea">
-					Author's Note
-					<textarea
-					readOnly=${!!cancel}
-					placeholder="Anything written here will be injected ${authorNoteDepth} newlines from bottom into context."
-					defaultValue=${authorNoteTokens.text}
-					value=${authorNoteTokens.text}
-					onInput=${(e)=>handleauthorNoteTokensChange("text", e.target.value)}
-					id="an-area"/>
-					<button
-					className="textAreaSettings"
-					disabled=${!!cancel}
-					onClick=${()=>toggleModal("an")}>
-					<svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="-1 -5 8 7" xmlns="http://www.w3.org/2000/svg"><path d="M0 0 3-3C3-4 3-5 5-5L4-4 5-3 6-4C6-2 5-2 4-2L1 1C0 2-1 1 0 0"></path></svg>
-					</button>
-				</label>
-				<button
-					id="viewWorldInfo"
-					disabled=${!!cancel}
-					onClick=${()=>toggleModal("wi")}>
-					Show World Info
-				</button>
-				<button
-					id="viewContext"
-					disabled=${!!cancel}
-					onClick=${()=>toggleModal("context")}>
-					Show Context
-				</button>
-			</${CollapsibleGroup}>
+			
 			${!!tokens && (0, _react1.html)`
 				<${InputBox} label="Tokens" value=${tokens} readOnly/>`}
 			<div className="buttons">
@@ -5399,9 +5408,9 @@ async function main() {
     (0, _client.createRoot)(document.body).render((0, _react1.html)`
 		<${App}
 			sessionStorage=${sessionStorage}
-			useSessionState=${_s((name, initialState)=>{
+			useSessionState=${_s((name1, initialState)=>{
         _s();
-        return useSessionState(sessionStorage, name, initialState);
+        return useSessionState(sessionStorage, name1, initialState);
     }, "5Ye/kOebiTMz6vpAxusFlB3KWoo=", false, function() {
         return [
             useSessionState
@@ -5423,7 +5432,7 @@ $RefreshReg$(_c6, "App");
   window.$RefreshReg$ = prevRefreshReg;
   window.$RefreshSig$ = prevRefreshSig;
 }
-},{"react":"21dqq","react-dom/client":"lOjBx","htm/react":"dR6gn","scrollview-resize":"7u3Xj","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru"}],"21dqq":[function(require,module,exports) {
+},{"react":"21dqq","react-dom/client":"lOjBx","htm/react":"dR6gn","scrollview-resize":"7u3Xj","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"km3Ru","../../img/infermatic_logo.png":"8O5qx"}],"21dqq":[function(require,module,exports) {
 "use strict";
 module.exports = require("a569817e6ea559f6");
 
@@ -29099,6 +29108,44 @@ function registerExportsForReactRefresh(module1) {
     }
 }
 
-},{"7422ead32dcc1e6b":"786KC"}]},["kXls7","1xC6H","aGBob"], "aGBob", "parcelRequiree0b1")
+},{"7422ead32dcc1e6b":"786KC"}],"8O5qx":[function(require,module,exports) {
+module.exports = require("aa27d08a91a709b").getBundleURL("lN8cU") + "infermatic_logo.8796e6ee.png" + "?" + Date.now();
+
+},{"aa27d08a91a709b":"lgJ39"}],"lgJ39":[function(require,module,exports) {
+"use strict";
+var bundleURL = {};
+function getBundleURLCached(id) {
+    var value = bundleURL[id];
+    if (!value) {
+        value = getBundleURL();
+        bundleURL[id] = value;
+    }
+    return value;
+}
+function getBundleURL() {
+    try {
+        throw new Error();
+    } catch (err) {
+        var matches = ("" + err.stack).match(/(https?|file|ftp|(chrome|moz|safari-web)-extension):\/\/[^)\n]+/g);
+        if (matches) // The first two stack frames will be this function and getBundleURLCached.
+        // Use the 3rd one, which will be a runtime in the original bundle.
+        return getBaseURL(matches[2]);
+    }
+    return "/";
+}
+function getBaseURL(url) {
+    return ("" + url).replace(/^((?:https?|file|ftp|(chrome|moz|safari-web)-extension):\/\/.+)\/[^/]+$/, "$1") + "/";
+}
+// TODO: Replace uses with `new URL(url).origin` when ie11 is no longer supported.
+function getOrigin(url) {
+    var matches = ("" + url).match(/(https?|file|ftp|(chrome|moz|safari-web)-extension):\/\/[^/]+/);
+    if (!matches) throw new Error("Origin not found");
+    return matches[0];
+}
+exports.getBundleURL = getBundleURLCached;
+exports.getBaseURL = getBaseURL;
+exports.getOrigin = getOrigin;
+
+},{}]},["kXls7","1xC6H","aGBob"], "aGBob", "parcelRequiree0b1")
 
 //# sourceMappingURL=index.02f00ce0.js.map
