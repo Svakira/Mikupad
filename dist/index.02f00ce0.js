@@ -3065,7 +3065,8 @@ async function abortCompletion({ endpoint, endpointAPI }) {
                 endpoint
             });
         case 4:
-            return await infermaticOobaAbortCompletion({
+            endpoint = "https://api.totalgpt.ai";
+            return await openaiOobaAbortCompletion({
                 endpoint
             });
     }
@@ -3114,24 +3115,37 @@ async function* parseEventStream(eventStream) {
             }
         }
     } finally{
-        eventStream.cancel();
+        if (eventStream.locked) console.log("El stream est\xe1 actualmente bloqueado y no se puede cancelar directamente.");
+        else {
+            console.log("El stream se est\xe1 pausando");
+            eventStream.cancel();
+        }
     }
 }
 async function llamaCppTokenCount({ endpoint, endpointAPIKey, signal, ...options }) {
-    const res = await fetch(new URL("/tokenize", endpoint), {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            ...endpointAPIKey ? {
-                "Authorization": `Bearer ${endpointAPIKey}`
-            } : {}
-        },
-        body: JSON.stringify(options),
-        signal
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const { tokens } = await res.json();
-    return tokens.length + 1; // + 1 for BOS, I guess.
+    if (!endpoint) {
+        console.error("Endpoint is empty. No request will be made.");
+        return;
+    } else {
+        if (!endpoint || !endpoint.startsWith("http://") && !endpoint.startsWith("https://")) {
+            console.error(" URL invalid:", endpoint);
+            return;
+        }
+        const res = await fetch(new URL("/tokenize", endpoint), {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                ...endpointAPIKey ? {
+                    "Authorization": `Bearer ${endpointAPIKey}`
+                } : {}
+            },
+            body: JSON.stringify(options),
+            signal
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const { tokens } = await res.json();
+        return tokens.length + 1; // + 1 for BOS, I guess.
+    }
 }
 async function* llamaCppCompletion({ endpoint, endpointAPIKey, signal, ...options }) {
     const res = await fetch(new URL("/completion", endpoint), {
@@ -3153,19 +3167,29 @@ async function* llamaCppCompletion({ endpoint, endpointAPIKey, signal, ...option
     return yield* await parseEventStream(res.body);
 }
 async function koboldCppTokenCount({ endpoint, signal, ...options }) {
-    const res = await fetch(new URL("/api/extra/tokencount", endpoint), {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            prompt: options.content
-        }),
-        signal
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const { value } = await res.json();
-    return value;
+    if (!endpoint) {
+        console.error("Endpoint is empty. No request will be made.");
+        return;
+    } else try {
+        const res = await fetch(new URL("/api/extra/tokencount", endpoint), {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                prompt: options.content
+            }),
+            signal
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const { value } = await res.json();
+        return value;
+    } catch (error) {
+        // Handle or log the error as needed
+        console.error("An error occurred:", error);
+        // Depending on your use case, you might want to rethrow the error, return a default value, etc.
+        throw error; // or return some default value
+    }
 }
 function koboldCppConvertOptions(options) {
     const swapOption = (lhs, rhs)=>{
@@ -3209,7 +3233,10 @@ async function koboldCppAbortCompletion({ endpoint }) {
     });
 }
 async function openaiOobaTokenCount({ endpoint, signal, ...options }) {
-    try {
+    if (!endpoint) {
+        console.error("Endpoint is empty. No request will be made.");
+        return;
+    } else try {
         const res = await fetch(new URL("/v1/internal/token-count", endpoint), {
             method: "POST",
             headers: {
@@ -4795,10 +4822,12 @@ function App({ sessionStorage, useSessionState }) {
     }
     function switchEndpointAPI(value) {
         let url;
-        try {
+        if (endpoint) try {
             url = new URL(endpoint);
         } catch  {
-            return;
+            // Handle the invalid URL case here if necessary
+            // For now, just print an error and use the default URL structure
+            console.error("Invalid URL provided:", endpoint);
         }
         switch(value){
             case 0:
