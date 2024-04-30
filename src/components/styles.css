@@ -449,10 +449,12 @@ hr {
 /* world info */
 
 .modal-wi-content {
-	display: flex;
-	flex-direction:column;
-	overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+ 
 }
+
 
 #modal-wi-global{
 	display: flex;
@@ -954,3 +956,17 @@ html.monospace-dark .horz-separator {
 	margin-top: 5%;
 	margin-bottom: 5%;
 }
+
+html.infermatic.custom-bg #sidebar,
+html.infermatic.custom-bg #sidebar2,
+html.infermatic.custom-bg #prompt-area {
+    background-color: rgba(26, 22, 51, 0.908); 
+}
+
+
+html.infermatic.custom-bg #prompt-area, 
+html.infermatic.custom-bg #sidebar, 
+html.infermatic.custom-bg #sidebar2 {
+    color: white; 
+}
+

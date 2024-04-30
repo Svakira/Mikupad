@@ -3115,23 +3115,45 @@ async function* parseEventStream(eventStream) {
             }
         }
     } finally{
-        if (eventStream.locked) console.log("El stream est\xe1 actualmente bloqueado y no se puede cancelar directamente.");
+        if (eventStream.locked) console.log("Stream bloqued cannot cancel");
         else {
-            console.log("El stream se est\xe1 pausando");
+            console.log("Stream paused");
             eventStream.cancel();
         }
     }
 }
 async function llamaCppTokenCount({ endpoint, endpointAPIKey, signal, ...options }) {
-    if (!endpoint) {
-        console.error("Endpoint is empty. No request will be made.");
-        return;
-    } else {
-        if (!endpoint || !endpoint.startsWith("http://") && !endpoint.startsWith("https://")) {
-            console.error(" URL invalid:", endpoint);
+    try {
+        if (!endpoint) {
+            console.error("Endpoint is empty. No request will be made.");
             return;
+        } else {
+            if (!endpoint || !endpoint.startsWith("http://") && !endpoint.startsWith("https://")) {
+                console.error(" URL invalid:", endpoint);
+                return;
+            }
+            const res = await fetch(new URL("/tokenize", endpoint), {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    ...endpointAPIKey ? {
+                        "Authorization": `Bearer ${endpointAPIKey}`
+                    } : {}
+                },
+                body: JSON.stringify(options),
+                signal
+            });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const { tokens } = await res.json();
+            return tokens.length + 1; // + 1 for BOS, I guess.
         }
-        const res = await fetch(new URL("/tokenize", endpoint), {
+    } catch (error) {
+        console.log(error);
+    }
+}
+async function* llamaCppCompletion({ endpoint, endpointAPIKey, signal, ...options }) {
+    try {
+        const res = await fetch(new URL("/completion", endpoint), {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -3139,56 +3161,46 @@ async function llamaCppTokenCount({ endpoint, endpointAPIKey, signal, ...options
                     "Authorization": `Bearer ${endpointAPIKey}`
                 } : {}
             },
-            body: JSON.stringify(options),
-            signal
-        });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const { tokens } = await res.json();
-        return tokens.length + 1; // + 1 for BOS, I guess.
-    }
-}
-async function* llamaCppCompletion({ endpoint, endpointAPIKey, signal, ...options }) {
-    const res = await fetch(new URL("/completion", endpoint), {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            ...endpointAPIKey ? {
-                "Authorization": `Bearer ${endpointAPIKey}`
-            } : {}
-        },
-        body: JSON.stringify({
-            ...options,
-            stream: true,
-            cache_prompt: true
-        }),
-        signal
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return yield* await parseEventStream(res.body);
-}
-async function koboldCppTokenCount({ endpoint, signal, ...options }) {
-    if (!endpoint) {
-        console.error("Endpoint is empty. No request will be made.");
-        return;
-    } else try {
-        const res = await fetch(new URL("/api/extra/tokencount", endpoint), {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
             body: JSON.stringify({
-                prompt: options.content
+                ...options,
+                stream: true,
+                cache_prompt: true
             }),
             signal
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const { value } = await res.json();
-        return value;
+        return yield* await parseEventStream(res.body);
     } catch (error) {
-        // Handle or log the error as needed
-        console.error("An error occurred:", error);
-        // Depending on your use case, you might want to rethrow the error, return a default value, etc.
-        throw error; // or return some default value
+        console.log(error);
+    }
+}
+async function koboldCppTokenCount({ endpoint, signal, ...options }) {
+    try {
+        if (!endpoint) {
+            console.error("Endpoint is empty. No request will be made.");
+            return;
+        } else try {
+            const res = await fetch(new URL("/api/extra/tokencount", endpoint), {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    prompt: options.content
+                }),
+                signal
+            });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const { value } = await res.json();
+            return value;
+        } catch (error) {
+            // Handle or log the error as needed
+            console.error("An error occurred:", error);
+            // Depending on your use case, you might want to rethrow the error, return a default value, etc.
+            throw error; // or return some default value
+        }
+    } catch (error) {
+        console.log(error);
     }
 }
 function koboldCppConvertOptions(options) {
@@ -3211,21 +3223,25 @@ function koboldCppConvertOptions(options) {
     return options;
 }
 async function* koboldCppCompletion({ endpoint, signal, ...options }) {
-    const res = await fetch(new URL("/api/extra/generate/stream", endpoint), {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            ...koboldCppConvertOptions(options),
-            stream: true
-        }),
-        signal
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    for await (const chunk of parseEventStream(res.body))yield {
-        content: chunk.token
-    };
+    try {
+        const res = await fetch(new URL("/api/extra/generate/stream", endpoint), {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                ...koboldCppConvertOptions(options),
+                stream: true
+            }),
+            signal
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        for await (const chunk of parseEventStream(res.body))yield {
+            content: chunk.token
+        };
+    } catch (error) {
+        console.log(error);
+    }
 }
 async function koboldCppAbortCompletion({ endpoint }) {
     await fetch(new URL("/api/extra/abort", endpoint), {
@@ -3233,26 +3249,30 @@ async function koboldCppAbortCompletion({ endpoint }) {
     });
 }
 async function openaiOobaTokenCount({ endpoint, signal, ...options }) {
-    if (!endpoint) {
-        console.error("Endpoint is empty. No request will be made.");
-        return;
-    } else try {
-        const res = await fetch(new URL("/v1/internal/token-count", endpoint), {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                text: options.content
-            }),
-            signal
-        });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const { length } = await res.json();
-        return length;
-    } catch (e) {
-        reportError(e);
-        return -1;
+    try {
+        if (!endpoint) {
+            console.error("Endpoint is empty. No request will be made.");
+            return;
+        } else try {
+            const res = await fetch(new URL("/v1/internal/token-count", endpoint), {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    text: options.content
+                }),
+                signal
+            });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const { length } = await res.json();
+            return length;
+        } catch (e) {
+            reportError(e);
+            return -1;
+        }
+    } catch (error) {
+        console.log(error);
     }
 }
 async function openaiTabbyTokenCount({ endpoint, endpointAPIKey, signal, ...options }) {
@@ -3277,17 +3297,21 @@ async function openaiTabbyTokenCount({ endpoint, endpointAPIKey, signal, ...opti
     }
 }
 async function openaiModels({ endpoint, endpointAPIKey, signal, ...options }) {
-    const res = await fetch(new URL("/v1/models", endpoint), {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${endpointAPIKey}`
-        },
-        signal
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const { data } = await res.json();
-    return data.map((item)=>item.id);
+    try {
+        const res = await fetch(new URL("/v1/models", endpoint), {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${endpointAPIKey}`
+            },
+            signal
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const { data } = await res.json();
+        return data.map((item)=>item.id);
+    } catch (error) {
+        console.log(error);
+    }
 }
 function openaiConvertOptions(options, isOpenAI) {
     const swapOption = (lhs, rhs)=>{
@@ -3627,10 +3651,6 @@ function Sessions({ sessionStorage, onSessionChange, disabled }) {
             sessionStorage.onsessionchange = null;
         };
     }, []);
-    (0, _react.useEffect)(()=>{
-        const savedImage = localStorage.getItem("backgroundImage");
-        if (savedImage) document.documentElement.style.setProperty("--custom-bg-image", `url(${savedImage})`);
-    }, []);
     const switchSession = async (sessionId)=>{
         if (sessionStorage.selectedSession != sessionId) await sessionStorage.switchSession(sessionId);
     };
@@ -3710,18 +3730,6 @@ function Sessions({ sessionStorage, onSessionChange, disabled }) {
         } else if (event.key === "Escape") {
             if (isCreating) setIsCreating(false);
             else if (renamingId !== undefined) setRenamingId(undefined);
-        }
-    }
-    function updateBackgroundImage(input) {
-        if (input.files && input.files[0]) {
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                // Establece la imagen de fondo.
-                document.documentElement.style.setProperty("--custom-bg-image", `url(${e.target.result})`);
-                // Guarda la imagen codificada en base64 en localStorage
-                localStorage.setItem("backgroundImage", e.target.result);
-            };
-            reader.readAsDataURL(input.files[0]);
         }
     }
     const trashSvg = (0, _react1.html)`<svg fill="var(--color-light)" width="16" height="16" viewBox="0 0 490.646 490.646"><path d="m399.179 67.285-74.794.033L324.356 0 166.214.066l.029 67.318-74.802.033.025 62.914h307.739l-.026-63.046zM198.28 32.11l94.03-.041.017 35.262-94.03.041-.017-35.262zM91.465 490.646h307.739V146.359H91.465v344.287zm225.996-297.274h16.028v250.259h-16.028V193.372zm-80.14 0h16.028v250.259h-16.028V193.372zm-80.141 0h16.028v250.259H157.18V193.372z"/></svg>`;
@@ -3814,7 +3822,7 @@ function Sessions({ sessionStorage, onSessionChange, disabled }) {
 				</div>
 		</div>`;
 }
-_s2(Sessions, "rN9akgINP1cbKQkOzrhZc+fkoeI=");
+_s2(Sessions, "IFB0S/Ly1cbLjhiIn+XdulvXTAk=");
 _c5 = Sessions;
 class SessionStorage {
     constructor(defaultPresets){
@@ -4372,6 +4380,37 @@ function App({ sessionStorage, useSessionState }) {
         worldInfo.prefix,
         worldInfo.suffix
     ]);
+    function setBackground() {
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = "image/*";
+        input.addEventListener("change", function() {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const imgUrl = e.target.result;
+                    localStorage.setItem("bgImage", imgUrl);
+                    applyBackgroundImage(imgUrl);
+                    document.documentElement.classList.add("custom-bg");
+                };
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+        input.click();
+    }
+    function applyBackgroundImage(imageUrl) {
+        document.body.style.backgroundImage = `url(${imageUrl})`;
+        document.body.style.backgroundSize = "cover";
+        document.body.style.backgroundPosition = "center";
+    }
+    function loadBackgroundFromStorage() {
+        const storedImage = localStorage.getItem("bgImage");
+        if (storedImage) {
+            applyBackgroundImage(storedImage);
+            document.documentElement.classList.add("custom-bg");
+        } else document.documentElement.classList.remove("custom-bg");
+    }
+    window.onload = loadBackgroundFromStorage;
     async function predict(prompt = modifiedPrompt, chunkCount = promptChunks.length) {
         if (cancel) {
             cancel?.();
@@ -4907,7 +4946,7 @@ function App({ sessionStorage, useSessionState }) {
 				<${Sessions} sessionStorage=${sessionStorage}
 					disabled=${!!cancel}
 					onSessionChange=${onSessionChange}/>
-        
+					<button onClick=${setBackground}>Change Background</button>
 			</container>
 			<${CollapsibleGroup} label="Persistent Context">
 				<label className="TextArea">
@@ -5169,17 +5208,7 @@ function App({ sessionStorage, useSessionState }) {
 					onClick=${cancel}>
 					Cancel
 				</button>
-				<div className="shorts">
-				${!cancel && (!!undoStack.current.length || !!redoStack.current.length) && (0, _react1.html)`
-					<button
-						title="Regenerate (Ctrl + R)"
-						disabled=${!undoStack.current.length}
-						onClick=${()=>undoAndPredict()}
-						onMouseEnter=${()=>setUndoHovered(true)}
-						onMouseLeave=${()=>setUndoHovered(false)}>
-						<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 40.499 40.5"><path d="M39.622,21.746l-6.749,6.75c-0.562,0.562-1.326,0.879-2.122,0.879s-1.56-0.316-2.121-0.879l-6.75-6.75		c-1.171-1.171-1.171-3.071,0-4.242c1.171-1.172,3.071-1.172,4.242,0l1.832,1.832C27.486,13.697,22.758,9.25,17,9.25		c-6.064,0-11,4.935-11,11c0,6.064,4.936,11,11,11c1.657,0,3,1.343,3,3s-1.343,3-3,3c-9.373,0-17-7.626-17-17s7.627-17,17-17		c8.936,0,16.266,6.933,16.936,15.698l1.442-1.444c1.172-1.172,3.072-1.172,4.242,0C40.792,18.674,40.792,20.574,39.622,21.746z" fill="var(--color-light)"/></svg>
-					</button>`}
-				</div>
+				
 				<div className="shorts">
 					${!cancel && (!!undoStack.current.length || !!redoStack.current.length) && (0, _react1.html)`
 						<button

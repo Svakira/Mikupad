@@ -994,4 +994,12 @@ html.monospace-dark .horz-separator {
   margin-top: 5%;
   margin-bottom: 5%;
 }
+
+html.infermatic.custom-bg #sidebar, html.infermatic.custom-bg #sidebar2, html.infermatic.custom-bg #prompt-area {
+  background-color: #1a1633e8;
+}
+
+html.infermatic.custom-bg #prompt-area, html.infermatic.custom-bg #sidebar, html.infermatic.custom-bg #sidebar2 {
+  color: #fff;
+}
 /*# sourceMappingURL=index.c28cd6cb.css.map */
